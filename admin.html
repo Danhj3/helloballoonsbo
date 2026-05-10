@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Hello Balloons</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --hb-pink: #E2557B;
+      --hb-teal: #0CA494;
+      --hb-yellow: #D6D234;
+      --hb-ink: #263238;
+      --hb-soft: #fff8fb;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: var(--hb-ink);
+      background-color: #f6f7f8;
+    }
+
+    .navbar {
+      background-color: var(--hb-pink);
+    }
+
+    .navbar-brand,
+    .navbar-nav .nav-link {
+      color: white !important;
+    }
+
+    .page-wrap {
+      padding: 36px 0;
+    }
+
+    .panel {
+      border: 1px solid #eceff1;
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 8px 18px rgba(38, 50, 56, 0.06);
+    }
+
+    .panel-body {
+      padding: 22px;
+    }
+
+    .btn-hb {
+      background-color: var(--hb-teal);
+      border-color: var(--hb-teal);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .btn-hb:hover,
+    .btn-hb:focus {
+      background-color: #087c72;
+      border-color: #087c72;
+      color: #fff;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .table-responsive {
+      max-height: 560px;
+      overflow: auto;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #eef9f7;
+      color: #087c72;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .setup-note {
+      border-left: 4px solid var(--hb-yellow);
+      background: #fffce5;
+      color: #5d5612;
+      padding: 12px 14px;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 992px) {
+      .admin-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html">Hello Balloons</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html#servicios">Servicios</a></li>
+          <li class="nav-item"><a class="nav-link" href="pedidos.html">Pedidos</a></li>
+          <li class="nav-item"><a class="nav-link active" href="admin.html">Admin</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-wrap">
+    <div class="container">
+      <div class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center mb-4">
+        <div>
+          <h1 class="fw-bold mb-1">Panel de servicios y pedidos</h1>
+          <p class="text-secondary mb-0">Gestiona precios, servicios disponibles y seguimiento de pedidos.</p>
+        </div>
+        <button id="signOutButton" class="btn btn-outline-secondary d-none" type="button">Cerrar sesion</button>
+      </div>
+
+      <section id="loginPanel" class="panel">
+        <div class="panel-body">
+          <h2 class="h4 fw-bold">Ingreso admin</h2>
+          <div id="loginSetupNote" class="setup-note mb-3 d-none"></div>
+          <form id="loginForm" class="row g-3">
+            <div class="col-md-5">
+              <label class="form-label" for="email">Email</label>
+              <input id="email" class="form-control" type="email" required />
+            </div>
+            <div class="col-md-5">
+              <label class="form-label" for="password">Password</label>
+              <input id="password" class="form-control" type="password" required />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-hb w-100" type="submit">Entrar</button>
+            </div>
+          </form>
+          <div id="loginMessage" class="mt-3"></div>
+        </div>
+      </section>
+
+      <section id="adminPanel" class="admin-grid d-none">
+        <div class="panel">
+          <div class="panel-body">
+            <h2 class="h4 fw-bold mb-3">Servicio</h2>
+            <form id="serviceForm" class="row g-3">
+              <input id="serviceId" type="hidden" />
+              <div class="col-12">
+                <label class="form-label" for="serviceName">Nombre</label>
+                <input id="serviceName" class="form-control" required />
+              </div>
+              <div class="col-md-8">
+                <label class="form-label" for="categorySelect">Categoria</label>
+                <select id="categorySelect" class="form-select"></select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="servicePrice">Precio Bs.</label>
+                <input id="servicePrice" class="form-control" type="number" min="0" step="0.01" required />
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="serviceDescription">Descripcion</label>
+                <textarea id="serviceDescription" class="form-control" rows="3"></textarea>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="serviceImage">Imagen URL</label>
+                <input id="serviceImage" class="form-control" type="url" placeholder="https://..." />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="displayOrder">Orden</label>
+                <input id="displayOrder" class="form-control" type="number" value="0" />
+              </div>
+              <div class="col-md-4 d-flex align-items-end">
+                <div class="form-check">
+                  <input id="isActive" class="form-check-input" type="checkbox" checked />
+                  <label class="form-check-label" for="isActive">Activo</label>
+                </div>
+              </div>
+              <div class="col-md-4 d-flex align-items-end">
+                <div class="form-check">
+                  <input id="isFeatured" class="form-check-input" type="checkbox" />
+                  <label class="form-check-label" for="isFeatured">Destacado</label>
+                </div>
+              </div>
+              <div class="col-12 d-flex flex-wrap gap-2">
+                <button class="btn btn-hb" type="submit">Guardar servicio</button>
+                <button id="clearServiceButton" class="btn btn-outline-secondary" type="button">Nuevo</button>
+              </div>
+            </form>
+            <div id="serviceMessage" class="mt-3"></div>
+          </div>
+        </div>
+
+        <div class="d-grid gap-3">
+          <div class="panel">
+            <div class="panel-body">
+              <div class="d-flex justify-content-between gap-3 align-items-center mb-3">
+                <h2 class="h4 fw-bold mb-0">Servicios cargados</h2>
+                <button id="refreshButton" class="btn btn-outline-secondary btn-sm" type="button">Actualizar</button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Precio</th>
+                      <th>Estado</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="servicesTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-body">
+              <h2 class="h4 fw-bold mb-3">Pedidos recientes</h2>
+              <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                  <thead>
+                    <tr>
+                      <th>Pedido</th>
+                      <th>Cliente</th>
+                      <th>Fecha</th>
+                      <th>Total</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ordersTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/hello-supabase.js"></script>
+  <script>
+    let adminServices = [];
+
+    function adminMessage(target, kind, text) {
+      document.getElementById(target).innerHTML = `<div class="alert alert-${kind}" role="alert">${window.HelloBalloonsData.escapeHtml(text)}</div>`;
+    }
+
+    function resetServiceForm() {
+      document.getElementById("serviceId").value = "";
+      document.getElementById("serviceName").value = "";
+      document.getElementById("servicePrice").value = "";
+      document.getElementById("serviceDescription").value = "";
+      document.getElementById("serviceImage").value = "";
+      document.getElementById("displayOrder").value = "0";
+      document.getElementById("isActive").checked = true;
+      document.getElementById("isFeatured").checked = false;
+    }
+
+    function editService(id) {
+      const service = adminServices.find((item) => String(item.id) === String(id));
+      if (!service) {
+        return;
+      }
+
+      document.getElementById("serviceId").value = service.id;
+      document.getElementById("serviceName").value = service.name || "";
+      document.getElementById("categorySelect").value = service.category_id || "";
+      document.getElementById("servicePrice").value = service.base_price || 0;
+      document.getElementById("serviceDescription").value = service.description || "";
+      document.getElementById("serviceImage").value = service.image_url || "";
+      document.getElementById("displayOrder").value = service.display_order || 0;
+      document.getElementById("isActive").checked = Boolean(service.is_active);
+      document.getElementById("isFeatured").checked = Boolean(service.is_featured);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderServicesTable() {
+      const table = document.getElementById("servicesTable");
+      table.innerHTML = adminServices.map((service) => `
+        <tr>
+          <td>${window.HelloBalloonsData.escapeHtml(service.name)}</td>
+          <td>${window.HelloBalloonsData.formatPrice(service.base_price, service.currency)}</td>
+          <td><span class="status-pill">${service.is_active ? "Activo" : "Oculto"}</span></td>
+          <td class="text-end"><button class="btn btn-outline-secondary btn-sm" type="button" data-service-id="${window.HelloBalloonsData.escapeAttr(service.id)}">Editar</button></td>
+        </tr>
+      `).join("");
+
+      table.querySelectorAll("[data-service-id]").forEach((button) => {
+        button.addEventListener("click", () => editService(button.dataset.serviceId));
+      });
+    }
+
+    function renderOrdersTable(orders) {
+      const table = document.getElementById("ordersTable");
+      if (!orders.length) {
+        table.innerHTML = `<tr><td colspan="5" class="text-secondary">Sin pedidos todavia.</td></tr>`;
+        return;
+      }
+
+      table.innerHTML = orders.map((order) => `
+        <tr>
+          <td>${window.HelloBalloonsData.escapeHtml(order.order_number || order.id)}</td>
+          <td>${window.HelloBalloonsData.escapeHtml(order.client_name)}<br><small class="text-secondary">${window.HelloBalloonsData.escapeHtml(order.client_phone || "")}</small></td>
+          <td>${window.HelloBalloonsData.escapeHtml(order.event_date || "")}</td>
+          <td>${window.HelloBalloonsData.formatPrice(order.total_amount, "BOB")}</td>
+          <td>
+            <select class="form-select form-select-sm" data-order-id="${window.HelloBalloonsData.escapeAttr(order.id)}">
+              ${["new", "quoted", "confirmed", "delivered", "cancelled"].map((status) => `<option value="${status}" ${order.status === status ? "selected" : ""}>${status}</option>`).join("")}
+            </select>
+          </td>
+        </tr>
+      `).join("");
+
+      table.querySelectorAll("[data-order-id]").forEach((select) => {
+        select.addEventListener("change", async () => {
+          try {
+            await window.HelloBalloonsData.updateOrderStatus(select.dataset.orderId, select.value);
+          } catch (error) {
+            alert(error.message || "No se pudo actualizar el pedido.");
+          }
+        });
+      });
+    }
+
+    async function loadAdminData() {
+      const categoriesResult = await window.HelloBalloonsData.fetchCategories();
+      document.getElementById("categorySelect").innerHTML = categoriesResult.categories.map((category) => `
+        <option value="${window.HelloBalloonsData.escapeAttr(category.id)}">${window.HelloBalloonsData.escapeHtml(category.name)}</option>
+      `).join("");
+
+      adminServices = await window.HelloBalloonsData.fetchAdminServices();
+      renderServicesTable();
+
+      const orders = await window.HelloBalloonsData.fetchOrders();
+      renderOrdersTable(orders);
+    }
+
+    async function showAdmin() {
+      document.getElementById("loginPanel").classList.add("d-none");
+      document.getElementById("adminPanel").classList.remove("d-none");
+      document.getElementById("signOutButton").classList.remove("d-none");
+      await loadAdminData();
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      if (!window.HelloBalloonsData.isConfigured()) {
+        const note = document.getElementById("loginSetupNote");
+        note.textContent = "Configura assets/js/supabase-config.js y ejecuta supabase/schema.sql antes de usar el panel.";
+        note.classList.remove("d-none");
+      }
+
+      const session = await window.HelloBalloonsData.getSession();
+      if (session) {
+        await showAdmin();
+      }
+
+      document.getElementById("loginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        try {
+          await window.HelloBalloonsData.signIn(
+            document.getElementById("email").value.trim(),
+            document.getElementById("password").value
+          );
+          await showAdmin();
+        } catch (error) {
+          adminMessage("loginMessage", "danger", error.message || "No se pudo iniciar sesion.");
+        }
+      });
+
+      document.getElementById("serviceForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        try {
+          await window.HelloBalloonsData.upsertService({
+            id: document.getElementById("serviceId").value || undefined,
+            name: document.getElementById("serviceName").value.trim(),
+            category_id: document.getElementById("categorySelect").value,
+            base_price: document.getElementById("servicePrice").value,
+            description: document.getElementById("serviceDescription").value.trim(),
+            image_url: document.getElementById("serviceImage").value.trim(),
+            display_order: document.getElementById("displayOrder").value,
+            is_active: document.getElementById("isActive").checked,
+            is_featured: document.getElementById("isFeatured").checked
+          });
+          adminMessage("serviceMessage", "success", "Servicio guardado.");
+          resetServiceForm();
+          await loadAdminData();
+        } catch (error) {
+          adminMessage("serviceMessage", "danger", error.message || "No se pudo guardar el servicio.");
+        }
+      });
+
+      document.getElementById("clearServiceButton").addEventListener("click", resetServiceForm);
+      document.getElementById("refreshButton").addEventListener("click", loadAdminData);
+      document.getElementById("signOutButton").addEventListener("click", async () => {
+        await window.HelloBalloonsData.signOut();
+        window.location.reload();
+      });
+    });
+  </script>
+</body>
+</html>

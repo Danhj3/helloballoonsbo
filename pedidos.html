@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pedidos - Hello Balloons</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --hb-pink: #E2557B;
+      --hb-teal: #0CA494;
+      --hb-yellow: #D6D234;
+      --hb-ink: #263238;
+      --hb-soft: #fff8fb;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: var(--hb-ink);
+      background: linear-gradient(rgba(255, 248, 251, 0.92), rgba(255, 248, 251, 0.92)), url('https://i.imgur.com/7y7PZ9i.jpeg') center/cover fixed;
+    }
+
+    .navbar {
+      background-color: var(--hb-pink);
+    }
+
+    .navbar-brand,
+    .navbar-nav .nav-link {
+      color: white !important;
+    }
+
+    .page-wrap {
+      padding: 54px 0;
+    }
+
+    .order-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid #eceff1;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 10px 24px rgba(38, 50, 56, 0.08);
+    }
+
+    .panel-body {
+      padding: 24px;
+    }
+
+    .panel h1,
+    .panel h2 {
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .btn-hb {
+      background-color: var(--hb-teal);
+      border-color: var(--hb-teal);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .btn-hb:hover,
+    .btn-hb:focus {
+      background-color: #087c72;
+      border-color: #087c72;
+      color: #fff;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 12px 0;
+      border-bottom: 1px solid #eceff1;
+    }
+
+    .summary-total {
+      color: var(--hb-pink);
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .status-note {
+      border-left: 4px solid var(--hb-yellow);
+      background: #fffce5;
+      color: #5d5612;
+      padding: 12px 14px;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 992px) {
+      .order-shell {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html">Hello Balloons</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html#servicios">Servicios</a></li>
+          <li class="nav-item"><a class="nav-link active" href="pedidos.html">Pedidos</a></li>
+          <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-wrap">
+    <div class="container">
+      <div class="order-shell">
+        <section class="panel">
+          <div class="panel-body">
+            <h1 class="mb-2">Nuevo pedido</h1>
+            <p class="text-secondary mb-4">Selecciona un servicio, completa los datos del evento y el pedido quedara guardado en Supabase.</p>
+            <div id="setupNotice" class="status-note mb-4 d-none"></div>
+
+            <form id="orderForm" class="row g-3" data-testid="order-form">
+              <div class="col-md-8">
+                <label class="form-label" for="serviceSelect">Servicio</label>
+                <select class="form-select" id="serviceSelect" required></select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="quantity">Cantidad</label>
+                <input class="form-control" type="number" id="quantity" min="1" value="1" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="clientName">Cliente</label>
+                <input class="form-control" id="clientName" required placeholder="Nombre completo" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="clientPhone">Telefono / WhatsApp</label>
+                <input class="form-control" id="clientPhone" required placeholder="Ej. 70000000" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="clientEmail">Email</label>
+                <input class="form-control" id="clientEmail" type="email" placeholder="opcional" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="eventDate">Fecha del evento</label>
+                <input class="form-control" id="eventDate" type="date" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="eventType">Tipo de evento</label>
+                <select class="form-select" id="eventType" required>
+                  <option value="">Seleccionar</option>
+                  <option>Cumpleanos</option>
+                  <option>Baby shower</option>
+                  <option>Bautizo</option>
+                  <option>Revelacion</option>
+                  <option>Graduacion</option>
+                  <option>Corporativo</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="eventAddress">Ubicacion</label>
+                <input class="form-control" id="eventAddress" placeholder="Salon, zona o direccion" />
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="notes">Detalles</label>
+                <textarea class="form-control" id="notes" rows="4" placeholder="Tema, colores, horario, referencias o pedidos extra"></textarea>
+              </div>
+              <div class="col-12">
+                <button class="btn btn-hb btn-lg" type="submit">Enviar pedido</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <aside class="panel">
+          <div class="panel-body">
+            <h2 class="h4 mb-3">Resumen</h2>
+            <div class="summary-row">
+              <span>Servicio</span>
+              <strong id="summaryService">-</strong>
+            </div>
+            <div class="summary-row">
+              <span>Precio unitario</span>
+              <strong id="summaryPrice">-</strong>
+            </div>
+            <div class="summary-row">
+              <span>Cantidad</span>
+              <strong id="summaryQty">1</strong>
+            </div>
+            <div class="pt-3">
+              <span class="d-block text-secondary">Total estimado</span>
+              <span class="summary-total" id="summaryTotal">-</span>
+            </div>
+            <div id="orderMessage" class="mt-4"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/hello-supabase.js"></script>
+  <script>
+    let services = [];
+
+    function selectedService() {
+      const select = document.getElementById("serviceSelect");
+      return services.find((service) => String(service.id) === select.value);
+    }
+
+    function updateSummary() {
+      const service = selectedService();
+      const quantity = Number(document.getElementById("quantity").value || 1);
+      const unitPrice = Number(service ? service.base_price : 0);
+      const total = unitPrice * quantity;
+
+      document.getElementById("summaryService").textContent = service ? service.name : "-";
+      document.getElementById("summaryPrice").textContent = service ? window.HelloBalloonsData.formatPrice(unitPrice, service.currency) : "-";
+      document.getElementById("summaryQty").textContent = quantity;
+      document.getElementById("summaryTotal").textContent = service ? window.HelloBalloonsData.formatPrice(total, service.currency) : "-";
+    }
+
+    function showMessage(kind, text) {
+      const message = document.getElementById("orderMessage");
+      message.innerHTML = `<div class="alert alert-${kind}" role="alert">${window.HelloBalloonsData.escapeHtml(text)}</div>`;
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const result = await window.HelloBalloonsData.fetchServices();
+      services = result.services;
+
+      const select = document.getElementById("serviceSelect");
+      const requestedService = new URLSearchParams(window.location.search).get("service");
+      select.innerHTML = services.map((service) => `
+        <option value="${window.HelloBalloonsData.escapeAttr(service.id)}">${window.HelloBalloonsData.escapeHtml(service.name)} - ${window.HelloBalloonsData.formatPrice(service.base_price, service.currency)}</option>
+      `).join("");
+
+      if (requestedService && services.some((service) => String(service.id) === requestedService)) {
+        select.value = requestedService;
+      }
+
+      if (!window.HelloBalloonsData.isConfigured()) {
+        const notice = document.getElementById("setupNotice");
+        notice.textContent = "Modo demo: configura Supabase para guardar pedidos reales.";
+        notice.classList.remove("d-none");
+      }
+
+      select.addEventListener("change", updateSummary);
+      document.getElementById("quantity").addEventListener("input", updateSummary);
+      updateSummary();
+
+      document.getElementById("orderForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const service = selectedService();
+        const quantity = Number(document.getElementById("quantity").value || 1);
+        const total = Number(service.base_price || 0) * quantity;
+
+        if (!window.HelloBalloonsData.isConfigured()) {
+          showMessage("warning", "Pedido preparado en modo demo. Configura Supabase para guardarlo.");
+          return;
+        }
+
+        const orderPayload = {
+          client_name: document.getElementById("clientName").value.trim(),
+          client_phone: document.getElementById("clientPhone").value.trim(),
+          client_email: document.getElementById("clientEmail").value.trim() || null,
+          event_date: document.getElementById("eventDate").value,
+          event_type: document.getElementById("eventType").value,
+          event_address: document.getElementById("eventAddress").value.trim() || null,
+          notes: document.getElementById("notes").value.trim() || null,
+          total_amount: total,
+          currency: service.currency || "BOB",
+          status: "new"
+        };
+
+        const items = [{
+          service_id: service.id,
+          quantity,
+          unit_price: Number(service.base_price || 0),
+          line_total: total
+        }];
+
+        try {
+          const created = await window.HelloBalloonsData.createOrder(orderPayload, items);
+          showMessage("success", `Pedido ${created.order_number || created.id} guardado correctamente.`);
+          event.target.reset();
+          document.getElementById("quantity").value = 1;
+          updateSummary();
+        } catch (error) {
+          showMessage("danger", error.message || "No se pudo guardar el pedido.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
