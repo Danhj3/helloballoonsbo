@@ -2,169 +2,351 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Hello Balloons - Decoración con Globos</title>
-  <!-- Incluimos Bootstrap para el carrusel y diseño responsive -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Incluimos FontAwesome para íconos de redes sociales -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hello Balloons - Decoracion con Globos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
   <style>
+    :root {
+      --hb-pink: #E2557B;
+      --hb-teal: #0CA494;
+      --hb-yellow: #D6D234;
+      --hb-ink: #263238;
+      --hb-soft: #fff8fb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f8f9fa;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: var(--hb-ink);
+      background-color: #f8f9fa;
     }
+
     .navbar {
-        background-color: #E2557B;
+      background-color: var(--hb-pink);
     }
-    .navbar-brand {
-        color: white !important;
-        font-weight: bold;
-    }
+
+    .navbar-brand,
     .navbar-nav .nav-link {
-        color: white !important;
+      color: white !important;
     }
+
+    .navbar-brand {
+      font-weight: bold;
+      letter-spacing: 0;
+    }
+
     .hero-section {
-        background-image: url('https://i.imgur.com/7y7PZ9i.jpeg');
-        background-size: cover;
-        background-position: center;
-        height: 400px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        text-align: center;
+      min-height: 520px;
+      display: flex;
+      align-items: center;
+      color: white;
+      background-image: linear-gradient(90deg, rgba(38, 50, 56, 0.72), rgba(38, 50, 56, 0.16)), url('https://i.imgur.com/7y7PZ9i.jpeg');
+      background-size: cover;
+      background-position: center;
     }
-    .hero-section h1 {
-        font-size: 3rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+
+    .hero-copy {
+      width: min(680px, 100%);
+      padding: 72px 0;
     }
-    .social-links {
-        margin-top: 20px;
+
+    .hero-copy h1 {
+      margin-bottom: 16px;
+      font-size: clamp(2.5rem, 6vw, 4.8rem);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: 0;
+      text-shadow: 0 3px 14px rgba(0, 0, 0, 0.35);
     }
+
+    .hero-copy p {
+      max-width: 560px;
+      font-size: 1.16rem;
+      line-height: 1.6;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-hb {
+      background-color: var(--hb-teal);
+      border-color: var(--hb-teal);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .btn-hb:hover,
+    .btn-hb:focus {
+      background-color: #087c72;
+      border-color: #087c72;
+      color: #fff;
+    }
+
+    .btn-outline-hb {
+      border-color: white;
+      color: white;
+      font-weight: 700;
+    }
+
+    .btn-outline-hb:hover,
+    .btn-outline-hb:focus {
+      background-color: white;
+      color: var(--hb-pink);
+    }
+
+    .section-band {
+      padding: 72px 0;
+    }
+
+    .section-band.soft {
+      background-color: var(--hb-soft);
+    }
+
+    .section-title {
+      margin-bottom: 12px;
+      font-weight: 800;
+      letter-spacing: 0;
+      color: var(--hb-ink);
+    }
+
+    .section-lead {
+      color: #5f6970;
+      max-width: 700px;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .service-card {
+      height: 100%;
+      overflow: hidden;
+      border: 1px solid #eceff1;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(38, 50, 56, 0.07);
+    }
+
+    .service-card img {
+      width: 100%;
+      height: 170px;
+      object-fit: cover;
+      background-color: #e9ecef;
+    }
+
+    .service-card-body {
+      padding: 18px;
+    }
+
+    .service-card h3 {
+      min-height: 52px;
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .service-card p {
+      min-height: 72px;
+      color: #5f6970;
+    }
+
+    .price {
+      color: var(--hb-pink);
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .gallery-strip {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr 1fr;
+      gap: 14px;
+    }
+
+    .gallery-strip img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .contact-band {
+      background-color: var(--hb-ink);
+      color: white;
+    }
+
+    .contact-band a {
+      color: white;
+      text-decoration: none;
+    }
+
     .social-links a {
-        color: #E2557B;
-        font-size: 2rem;
-        margin: 0 10px;
-        transition: color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.12);
+      color: white;
+      font-size: 1.2rem;
+      transition: background-color 0.2s ease;
     }
+
     .social-links a:hover {
-        color: #0CA494;
+      background-color: var(--hb-teal);
     }
-    .carousel-item img {
-        height: 500px;
-        object-fit: cover;
+
+    .status-note {
+      border-left: 4px solid var(--hb-yellow);
+      background: #fffce5;
+      color: #5d5612;
+      padding: 12px 14px;
+      border-radius: 6px;
     }
-    .chatbot {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 1000;
+
+    @media (max-width: 992px) {
+      .service-grid,
+      .gallery-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
-    .chatbot-btn {
-        background-color: #E2557B;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 60px;
-        height: 60px;
-        font-size: 1.5rem;
-        cursor: pointer;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .chatbot-btn:hover {
-        background-color: #0CA494;
+
+    @media (max-width: 576px) {
+      .hero-section {
+        min-height: 560px;
+      }
+
+      .hero-copy {
+        padding: 56px 0;
+      }
+
+      .service-grid,
+      .gallery-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .gallery-strip img {
+        height: 220px;
+      }
     }
   </style>
 </head>
 <body>
-    <!-- Barra de navegación -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">Hello Balloons</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#inicio">Inicio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#servicios">Servicios</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#galeria">Galería</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#contacto">Contacto</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Sección Hero -->
-    <section id="inicio" class="hero-section">
-        <div>
-            <h1>Hello Balloons</h1>
-            <p>Decoración con globos para tus eventos especiales</p>
-            <div class="social-links">
-                <a href="https://facebook.com/helloballoons" target="_blank"><i class="fab fa-facebook"></i></a>
-                <a href="https://instagram.com/helloballoons" target="_blank"><i class="fab fa-instagram"></i></a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Carrusel de fotos -->
-    <section id="galeria" class="container my-5">
-        <h2 class="text-center mb-4">Galería</h2>
-        <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                <div class="carousel-item active">
-                    <img src="https://i.imgur.com/1a2b3c4.jpeg" class="d-block w-100" alt="Decoración 1">
-                </div>
-                <div class="carousel-item">
-                    <img src="https://i.imgur.com/5d6e7f8.jpeg" class="d-block w-100" alt="Decoración 2">
-                </div>
-                <div class="carousel-item">
-                    <img src="https://i.imgur.com/9a0b1c2.jpeg" class="d-block w-100" alt="Decoración 3">
-                </div>
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Anterior</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Siguiente</span>
-            </button>
-        </div>
-    </section>
-
-    <!-- Chatbot -->
-    <div class="chatbot">
-        <button class="chatbot-btn" onclick="toggleChatbot()"><i class="fas fa-comment-dots"></i></button>
-        <div id="chatbotWindow" style="display: none;">
-            <!-- Aquí puedes integrar un chatbot como Tars o Dialogflow -->
-            <iframe
-                src="https://console.dialogflow.com/api-client/demo/embedded/your-agent-id"
-                width="350"
-                height="500"
-                style="border: none;"
-            ></iframe>
-        </div>
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Hello Balloons</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="#servicios">Servicios</a></li>
+          <li class="nav-item"><a class="nav-link" href="#galeria">Galeria</a></li>
+          <li class="nav-item"><a class="nav-link" href="pedidos.html">Pedidos</a></li>
+          <li class="nav-item"><a class="nav-link" href="inventario.html">Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+        </ul>
+      </div>
     </div>
+  </nav>
 
-    <!-- Scripts de Bootstrap y personalizados -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Función para mostrar/ocultar el chatbot
-        function toggleChatbot() {
-            const chatbotWindow = document.getElementById("chatbotWindow");
-            chatbotWindow.style.display = chatbotWindow.style.display === "none" ? "block" : "none";
-        }
-    </script>
+  <header class="hero-section" id="inicio">
+    <div class="container">
+      <div class="hero-copy">
+        <h1>Hello Balloons</h1>
+        <p>Decoracion con globos, mobiliario y accesorios para cumpleanos, baby showers, bautizos, revelaciones, graduaciones y eventos corporativos.</p>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <a class="btn btn-hb btn-lg" href="pedidos.html">Cotizar pedido</a>
+          <a class="btn btn-outline-hb btn-lg" href="#servicios">Ver precios</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="servicios" class="section-band soft">
+      <div class="container">
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
+          <div>
+            <h2 class="section-title">Servicios y precios</h2>
+            <p class="section-lead mb-0">El catalogo se carga desde Supabase cuando esta configurado. Mientras tanto se muestran servicios base para que la pagina siga funcionando.</p>
+          </div>
+          <div class="align-self-lg-end">
+            <a class="btn btn-hb" href="pedidos.html">Crear pedido</a>
+          </div>
+        </div>
+        <div id="supabaseStatus" class="status-note mb-4 d-none"></div>
+        <div id="servicesGrid" class="service-grid" data-testid="services-grid"></div>
+      </div>
+    </section>
+
+    <section id="galeria" class="section-band">
+      <div class="container">
+        <h2 class="section-title">Galeria</h2>
+        <p class="section-lead">Una muestra rapida del estilo visual de Hello Balloons.</p>
+        <div class="gallery-strip mt-4">
+          <img src="https://i.imgur.com/7y7PZ9i.jpeg" alt="Decoracion con globos para evento" />
+          <img src="https://i.imgur.com/41t5f0K.png" alt="Logo de Hello Balloons" />
+          <img src="https://i.imgur.com/7y7PZ9i.jpeg" alt="Montaje de globos y mobiliario" />
+        </div>
+      </div>
+    </section>
+
+    <section id="contacto" class="section-band contact-band">
+      <div class="container">
+        <div class="row g-4 align-items-center">
+          <div class="col-lg-7">
+            <h2 class="section-title text-white">Listos para armar tu evento</h2>
+            <p class="mb-0">Recibimos pedidos por la web y los dejamos guardados en Supabase para dar seguimiento, actualizar estados y calcular totales.</p>
+          </div>
+          <div class="col-lg-5 text-lg-end">
+            <div class="social-links mb-3">
+              <a href="https://www.facebook.com/helloballoonsbo" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+              <a href="https://www.instagram.com/helloballoonsbo" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            </div>
+            <a class="btn btn-hb" href="pedidos.html">Enviar solicitud</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/hello-supabase.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const grid = document.getElementById("servicesGrid");
+      const status = document.getElementById("supabaseStatus");
+      const data = await window.HelloBalloonsData.fetchServices();
+
+      if (!window.HelloBalloonsData.isConfigured()) {
+        status.textContent = "Supabase aun no esta configurado; se muestra contenido de ejemplo.";
+        status.classList.remove("d-none");
+      }
+
+      grid.innerHTML = data.services.map((service) => `
+        <article class="service-card">
+          <img src="${window.HelloBalloonsData.escapeAttr(service.image_url || window.HelloBalloonsData.defaultImage)}" alt="${window.HelloBalloonsData.escapeAttr(service.name)}" />
+          <div class="service-card-body">
+            <h3>${window.HelloBalloonsData.escapeHtml(service.name)}</h3>
+            <p>${window.HelloBalloonsData.escapeHtml(service.description || "Servicio personalizado para tu evento.")}</p>
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <span class="price">${window.HelloBalloonsData.formatPrice(service.base_price, service.currency)}</span>
+              <a class="btn btn-sm btn-hb" href="pedidos.html?service=${encodeURIComponent(service.id)}">Pedir</a>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    });
+  </script>
 </body>
 </html>
