@@ -1,6 +1,6 @@
 window.HELLO_BALLOONS_SUPABASE = {
   url: "https://dcyhfiwuyjydqprkljcu.supabase.co",
-  anonKey: "TU_ANON_KEY_PUBLICA"
+  anonKey: "sb_publishable_ieDJVa8mSfhW7ffs-ke8dw_8mEFOp6T"
 };
 
 window.HELLO_BALLOONS_BASE_LOCATION = {
