@@ -3,349 +3,139 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello Balloons - Decoracion con Globos</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
-  <style>
-    :root {
-      --hb-pink: #E2557B;
-      --hb-teal: #0CA494;
-      --hb-yellow: #D6D234;
-      --hb-ink: #263238;
-      --hb-soft: #fff8fb;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      color: var(--hb-ink);
-      background-color: #f8f9fa;
-    }
-
-    .navbar {
-      background-color: var(--hb-pink);
-    }
-
-    .navbar-brand,
-    .navbar-nav .nav-link {
-      color: white !important;
-    }
-
-    .navbar-brand {
-      font-weight: bold;
-      letter-spacing: 0;
-    }
-
-    .hero-section {
-      min-height: 520px;
-      display: flex;
-      align-items: center;
-      color: white;
-      background-image: linear-gradient(90deg, rgba(38, 50, 56, 0.72), rgba(38, 50, 56, 0.16)), url('https://i.imgur.com/7y7PZ9i.jpeg');
-      background-size: cover;
-      background-position: center;
-    }
-
-    .hero-copy {
-      width: min(680px, 100%);
-      padding: 72px 0;
-    }
-
-    .hero-copy h1 {
-      margin-bottom: 16px;
-      font-size: clamp(2.5rem, 6vw, 4.8rem);
-      font-weight: 800;
-      line-height: 0.95;
-      letter-spacing: 0;
-      text-shadow: 0 3px 14px rgba(0, 0, 0, 0.35);
-    }
-
-    .hero-copy p {
-      max-width: 560px;
-      font-size: 1.16rem;
-      line-height: 1.6;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    }
-
-    .btn-hb {
-      background-color: var(--hb-teal);
-      border-color: var(--hb-teal);
-      color: #fff;
-      font-weight: 700;
-    }
-
-    .btn-hb:hover,
-    .btn-hb:focus {
-      background-color: #087c72;
-      border-color: #087c72;
-      color: #fff;
-    }
-
-    .btn-outline-hb {
-      border-color: white;
-      color: white;
-      font-weight: 700;
-    }
-
-    .btn-outline-hb:hover,
-    .btn-outline-hb:focus {
-      background-color: white;
-      color: var(--hb-pink);
-    }
-
-    .section-band {
-      padding: 72px 0;
-    }
-
-    .section-band.soft {
-      background-color: var(--hb-soft);
-    }
-
-    .section-title {
-      margin-bottom: 12px;
-      font-weight: 800;
-      letter-spacing: 0;
-      color: var(--hb-ink);
-    }
-
-    .section-lead {
-      color: #5f6970;
-      max-width: 700px;
-    }
-
-    .service-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 18px;
-    }
-
-    .service-card {
-      height: 100%;
-      overflow: hidden;
-      border: 1px solid #eceff1;
-      border-radius: 8px;
-      background: #fff;
-      box-shadow: 0 8px 18px rgba(38, 50, 56, 0.07);
-    }
-
-    .service-card img {
-      width: 100%;
-      height: 170px;
-      object-fit: cover;
-      background-color: #e9ecef;
-    }
-
-    .service-card-body {
-      padding: 18px;
-    }
-
-    .service-card h3 {
-      min-height: 52px;
-      margin: 0 0 8px;
-      font-size: 1.1rem;
-      font-weight: 800;
-      letter-spacing: 0;
-    }
-
-    .service-card p {
-      min-height: 72px;
-      color: #5f6970;
-    }
-
-    .price {
-      color: var(--hb-pink);
-      font-size: 1.15rem;
-      font-weight: 800;
-    }
-
-    .gallery-strip {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr 1fr;
-      gap: 14px;
-    }
-
-    .gallery-strip img {
-      width: 100%;
-      height: 280px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    .contact-band {
-      background-color: var(--hb-ink);
-      color: white;
-    }
-
-    .contact-band a {
-      color: white;
-      text-decoration: none;
-    }
-
-    .social-links a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-      margin-right: 8px;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.12);
-      color: white;
-      font-size: 1.2rem;
-      transition: background-color 0.2s ease;
-    }
-
-    .social-links a:hover {
-      background-color: var(--hb-teal);
-    }
-
-    .status-note {
-      border-left: 4px solid var(--hb-yellow);
-      background: #fffce5;
-      color: #5d5612;
-      padding: 12px 14px;
-      border-radius: 6px;
-    }
-
-    @media (max-width: 992px) {
-      .service-grid,
-      .gallery-strip {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 576px) {
-      .hero-section {
-        min-height: 560px;
-      }
-
-      .hero-copy {
-        padding: 56px 0;
-      }
-
-      .service-grid,
-      .gallery-strip {
-        grid-template-columns: 1fr;
-      }
-
-      .gallery-strip img {
-        height: 220px;
-      }
-    }
-  </style>
+  <title>Hello Balloons | Decoración rentable e inteligente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hb-app.css" />
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-    <div class="container">
-      <a class="navbar-brand" href="index.html">Hello Balloons</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Abrir menu">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="#servicios">Servicios</a></li>
-          <li class="nav-item"><a class="nav-link" href="#galeria">Galeria</a></li>
-          <li class="nav-item"><a class="nav-link" href="pedidos.html">Pedidos</a></li>
-          <li class="nav-item"><a class="nav-link" href="inventario.html">Inventario</a></li>
-          <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <header class="hero-section" id="inicio">
-    <div class="container">
-      <div class="hero-copy">
-        <h1>Hello Balloons</h1>
-        <p>Decoracion con globos, mobiliario y accesorios para cumpleanos, baby showers, bautizos, revelaciones, graduaciones y eventos corporativos.</p>
-        <div class="d-flex flex-wrap gap-2 mt-4">
-          <a class="btn btn-hb btn-lg" href="pedidos.html">Cotizar pedido</a>
-          <a class="btn btn-outline-hb btn-lg" href="#servicios">Ver precios</a>
+  <div class="hb-shell">
+    <nav class="hb-nav">
+      <div class="hb-nav-inner">
+        <a class="hb-brand" href="index.html">
+          <img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" />
+          <span>Hello Balloons</span>
+        </a>
+        <div class="hb-nav-links">
+          <a class="active" href="index.html">Inicio</a>
+          <a href="cotizador.html">Cotizador</a>
+          <a href="inventario-app.html">Inventario</a>
+          <a href="rutas.html">Rutas</a>
+          <a href="admin.html">Admin</a>
         </div>
       </div>
-    </div>
-  </header>
+    </nav>
 
-  <main>
-    <section id="servicios" class="section-band soft">
-      <div class="container">
-        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
-          <div>
-            <h2 class="section-title">Servicios y precios</h2>
-            <p class="section-lead mb-0">El catalogo se carga desde Supabase cuando esta configurado. Mientras tanto se muestran servicios base para que la pagina siga funcionando.</p>
-          </div>
-          <div class="align-self-lg-end">
-            <a class="btn btn-hb" href="pedidos.html">Crear pedido</a>
+    <header class="hb-hero">
+      <div class="hb-container hb-hero-grid">
+        <div>
+          <div class="hb-eyebrow">Decoración, cotización y operación en un solo sistema</div>
+          <h1 class="hb-title">Eventos hermosos, <span>números claros.</span></h1>
+          <p class="hb-lead">Hello Balloons ahora puede trabajar con cotización rentable, inventario por color, cálculo de transporte desde El Palmar y planificación de rutas para varios eventos en un mismo día.</p>
+          <div class="hb-actions">
+            <a class="hb-button primary" href="cotizador.html">Crear cotización</a>
+            <a class="hb-button secondary" href="pedidos.html">Formulario cliente</a>
           </div>
         </div>
-        <div id="supabaseStatus" class="status-note mb-4 d-none"></div>
-        <div id="servicesGrid" class="service-grid" data-testid="services-grid"></div>
-      </div>
-    </section>
-
-    <section id="galeria" class="section-band">
-      <div class="container">
-        <h2 class="section-title">Galeria</h2>
-        <p class="section-lead">Una muestra rapida del estilo visual de Hello Balloons.</p>
-        <div class="gallery-strip mt-4">
-          <img src="https://i.imgur.com/7y7PZ9i.jpeg" alt="Decoracion con globos para evento" />
-          <img src="https://i.imgur.com/41t5f0K.png" alt="Logo de Hello Balloons" />
-          <img src="https://i.imgur.com/7y7PZ9i.jpeg" alt="Montaje de globos y mobiliario" />
+        <div class="hb-visual-card">
+          <div class="hb-visual-badge">
+            <strong>Regla operativa 50/50</strong>
+            <span class="hb-muted">El sistema alerta si los costos superan la mitad del precio final.</span>
+          </div>
         </div>
       </div>
-    </section>
+    </header>
 
-    <section id="contacto" class="section-band contact-band">
-      <div class="container">
-        <div class="row g-4 align-items-center">
-          <div class="col-lg-7">
-            <h2 class="section-title text-white">Listos para armar tu evento</h2>
-            <p class="mb-0">Recibimos pedidos por la web y los dejamos guardados en Supabase para dar seguimiento, actualizar estados y calcular totales.</p>
+    <main>
+      <section class="hb-section">
+        <div class="hb-container">
+          <div class="hb-grid-3">
+            <article class="hb-kpi">
+              <span>Base logística</span>
+              <strong>El Palmar</strong>
+              <small class="hb-muted">-17.830615, -63.157275</small>
+            </article>
+            <article class="hb-kpi">
+              <span>Margen objetivo</span>
+              <strong>50%</strong>
+              <small class="hb-muted">precio mínimo = costo ÷ 0.5</small>
+            </article>
+            <article class="hb-kpi">
+              <span>Backend</span>
+              <strong>Supabase</strong>
+              <small class="hb-muted">Auth, RLS, cotizaciones, inventario y rutas</small>
+            </article>
           </div>
-          <div class="col-lg-5 text-lg-end">
-            <div class="social-links mb-3">
-              <a href="https://www.facebook.com/helloballoonsbo" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-              <a href="https://www.instagram.com/helloballoonsbo" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        </div>
+      </section>
+
+      <section class="hb-section">
+        <div class="hb-container">
+          <div class="hb-section-header">
+            <div>
+              <h2>Servicios</h2>
+              <p class="hb-muted">Se cargan desde Supabase cuando configures la anon key pública.</p>
             </div>
-            <a class="btn btn-hb" href="pedidos.html">Enviar solicitud</a>
+            <a class="hb-button secondary" href="cotizador.html">Cotizar</a>
           </div>
+          <div id="servicesGrid" class="hb-grid-3"></div>
+          <div id="setupNotice" class="hb-alert warn" style="display:none;margin-top:18px"></div>
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+      <section class="hb-section">
+        <div class="hb-container hb-grid-3">
+          <article class="hb-card pad">
+            <h3>Cotización rentable</h3>
+            <p class="hb-muted">Materiales, personal, transporte, alquiler externo, pintura y extras se suman al costo total antes de definir precio.</p>
+          </article>
+          <article class="hb-card pad">
+            <h3>Inventario con memoria</h3>
+            <p class="hb-muted">Cada mueble puede tener color actual, estado, ubicación, condición, foto, historial y reservas por fecha.</p>
+          </article>
+          <article class="hb-card pad">
+            <h3>Rutas y tiempos</h3>
+            <p class="hb-muted">El sistema prepara la base para ordenar eventos del día, detectar conflictos y reducir costos de traslado.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="hb-footer">
+      <div class="hb-container">
+        <strong>Hello Balloons</strong>
+        <p class="hb-muted" style="color:rgba(255,255,255,.72)">Decoración de escenarios para eventos — Santa Cruz de la Sierra.</p>
+      </div>
+    </footer>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase-config.js"></script>
-  <script src="assets/js/hello-supabase.js"></script>
+  <script src="assets/js/hb-core.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const grid = document.getElementById("servicesGrid");
-      const status = document.getElementById("supabaseStatus");
-      const data = await window.HelloBalloonsData.fetchServices();
-
-      if (!window.HelloBalloonsData.isConfigured()) {
-        status.textContent = "Supabase aun no esta configurado; se muestra contenido de ejemplo.";
-        status.classList.remove("d-none");
-      }
-
-      grid.innerHTML = data.services.map((service) => `
-        <article class="service-card">
-          <img src="${window.HelloBalloonsData.escapeAttr(service.image_url || window.HelloBalloonsData.defaultImage)}" alt="${window.HelloBalloonsData.escapeAttr(service.name)}" />
-          <div class="service-card-body">
-            <h3>${window.HelloBalloonsData.escapeHtml(service.name)}</h3>
-            <p>${window.HelloBalloonsData.escapeHtml(service.description || "Servicio personalizado para tu evento.")}</p>
-            <div class="d-flex align-items-center justify-content-between gap-3">
-              <span class="price">${window.HelloBalloonsData.formatPrice(service.base_price, service.currency)}</span>
-              <a class="btn btn-sm btn-hb" href="pedidos.html?service=${encodeURIComponent(service.id)}">Pedir</a>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const grid = document.getElementById('servicesGrid');
+      const notice = document.getElementById('setupNotice');
+      const services = await window.HB.fetchServices();
+      grid.innerHTML = services.map(service => `
+        <article class="hb-card">
+          <img class="hb-card-img" src="${window.HB.escapeAttr(service.image_url || window.HB.brand.heroImage)}" alt="${window.HB.escapeAttr(service.name)}" />
+          <div class="hb-card-body">
+            <h3>${window.HB.escapeHtml(service.name)}</h3>
+            <p class="hb-muted">${window.HB.escapeHtml(service.description || 'Servicio personalizado para tu evento.')}</p>
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:16px">
+              <span class="hb-price">${window.HB.money(service.base_price, service.currency)}</span>
+              <a class="hb-button primary" href="cotizador.html?service=${encodeURIComponent(service.id)}">Usar</a>
             </div>
           </div>
         </article>
-      `).join("");
+      `).join('');
+
+      if (!window.HB.isConfigured()) {
+        notice.textContent = 'Falta configurar la anon key pública de Supabase. La web muestra datos de ejemplo mientras tanto.';
+        notice.style.display = 'block';
+      }
     });
   </script>
 </body>
