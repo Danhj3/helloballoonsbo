@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventario | Hello Balloons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hb-app.css" />
+</head>
+<body>
+  <nav class="hb-nav">
+    <div class="hb-nav-inner">
+      <a class="hb-brand" href="index.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Hello Balloons</span></a>
+      <div class="hb-nav-links">
+        <a href="index.html">Inicio</a>
+        <a href="cotizador.html">Cotizador</a>
+        <a class="active" href="inventario-app.html">Inventario</a>
+        <a href="rutas.html">Rutas</a>
+        <a href="admin.html">Admin</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="hb-section">
+    <div class="hb-container">
+      <div class="hb-section-header">
+        <div>
+          <div class="hb-eyebrow">Color, estado y disponibilidad</div>
+          <h2>Inventario operativo</h2>
+          <p class="hb-muted">Pensado para que el trabajador actualice color, estado, ubicación y condición desde el celular.</p>
+        </div>
+      </div>
+
+      <div id="setupNotice" class="hb-alert warn" style="display:none;margin-bottom:18px">Falta la anon key pública de Supabase. Esta pantalla mostrará una estructura de ejemplo.</div>
+
+      <div class="hb-grid-2">
+        <section class="hb-card pad">
+          <h3>Actualización rápida</h3>
+          <form id="inventoryForm" class="hb-form">
+            <div class="hb-field">
+              <label>Código del mueble</label>
+              <input id="itemCode" placeholder="Ej. PANEL-001" />
+            </div>
+            <div class="hb-field">
+              <label>Nombre</label>
+              <input id="itemName" placeholder="Panel circular grande" />
+            </div>
+            <div class="hb-inline">
+              <div class="hb-field">
+                <label>Color actual</label>
+                <input id="itemColor" placeholder="Blanco, dorado, rosado..." />
+              </div>
+              <div class="hb-field">
+                <label>Estado</label>
+                <select id="itemStatus">
+                  <option value="available">Disponible</option>
+                  <option value="reserved">Reservado</option>
+                  <option value="in_use">En uso</option>
+                  <option value="maintenance">Mantenimiento</option>
+                  <option value="requires_paint">Requiere pintura</option>
+                  <option value="damaged">Dañado</option>
+                  <option value="out_of_service">Fuera de servicio</option>
+                </select>
+              </div>
+            </div>
+            <div class="hb-field">
+              <label>Ubicación actual</label>
+              <input id="itemLocation" placeholder="Base, evento, taller, depósito..." />
+            </div>
+            <div class="hb-field">
+              <label>Condición / notas</label>
+              <textarea id="itemNotes" placeholder="Rayado leve, necesita retoque, volvió sucio..."></textarea>
+            </div>
+            <button class="hb-button primary" type="submit">Guardar actualización</button>
+          </form>
+          <div id="formMessage" class="hb-alert info" style="display:none;margin-top:16px"></div>
+        </section>
+
+        <section class="hb-card pad">
+          <h3>Lectura operativa</h3>
+          <p class="hb-muted">La IA podrá usar estos datos como fuente de verdad, pero no debe inventarlos. Si no hay actualización reciente, debe advertir: “verificar antes de confirmar”.</p>
+          <div class="hb-grid-2" style="margin-top:14px">
+            <div class="hb-kpi"><span>Disponible</span><strong id="availableCount">0</strong></div>
+            <div class="hb-kpi"><span>Revisar</span><strong id="reviewCount">0</strong></div>
+          </div>
+          <div class="hb-alert warn" style="margin-top:18px">Si un mueble ya está reservado, la base evita solapamientos cuando se registran reservas reales en Supabase.</div>
+        </section>
+      </div>
+
+      <section class="hb-section">
+        <div class="hb-table-wrap">
+          <table class="hb-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Mueble</th>
+                <th>Color</th>
+                <th>Estado</th>
+                <th>Ubicación</th>
+                <th>Notas</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/hb-core.js"></script>
+  <script>
+    let inventory = [
+      { code: 'PANEL-001', name: 'Panel circular grande', current_color: 'Blanco', current_status: 'available', current_location: 'Base', condition_notes: 'Listo para uso' },
+      { code: 'MESA-001', name: 'Mesa cilíndrica', current_color: 'Dorado', current_status: 'requires_paint', current_location: 'Base', condition_notes: 'Requiere retoque antes de evento elegante' }
+    ];
+
+    function render() {
+      const table = document.getElementById('inventoryTable');
+      table.innerHTML = inventory.map(item => `
+        <tr>
+          <td>${window.HB.escapeHtml(item.code)}</td>
+          <td><strong>${window.HB.escapeHtml(item.name)}</strong></td>
+          <td>${window.HB.escapeHtml(item.current_color || '-')}</td>
+          <td><span class="hb-status ${['available'].includes(item.current_status) ? 'verde' : ['requires_paint','maintenance','reserved','in_use'].includes(item.current_status) ? 'amarillo' : 'rojo'}">${window.HB.escapeHtml(item.current_status)}</span></td>
+          <td>${window.HB.escapeHtml(item.current_location || '-')}</td>
+          <td>${window.HB.escapeHtml(item.condition_notes || '-')}</td>
+        </tr>
+      `).join('');
+      document.getElementById('availableCount').textContent = inventory.filter(i => i.current_status === 'available').length;
+      document.getElementById('reviewCount').textContent = inventory.filter(i => i.current_status !== 'available').length;
+    }
+
+    async function load() {
+      if (!window.HB.isConfigured()) {
+        document.getElementById('setupNotice').style.display = 'block';
+        render();
+        return;
+      }
+      try {
+        inventory = await window.HB.fetchInventory();
+      } catch (error) {
+        document.getElementById('setupNotice').textContent = error.message || 'No se pudo cargar inventario.';
+        document.getElementById('setupNotice').style.display = 'block';
+      }
+      render();
+    }
+
+    document.getElementById('inventoryForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const item = {
+        code: document.getElementById('itemCode').value.trim(),
+        name: document.getElementById('itemName').value.trim(),
+        current_color: document.getElementById('itemColor').value.trim(),
+        current_status: document.getElementById('itemStatus').value,
+        current_location: document.getElementById('itemLocation').value.trim() || 'Base',
+        condition_notes: document.getElementById('itemNotes').value.trim()
+      };
+      const message = document.getElementById('formMessage');
+
+      if (!item.code || !item.name) {
+        message.textContent = 'Código y nombre son obligatorios.';
+        message.className = 'hb-alert danger';
+        message.style.display = 'block';
+        return;
+      }
+
+      if (!window.HB.isConfigured()) {
+        inventory.unshift(item);
+        render();
+        message.textContent = 'Guardado en modo prototipo local. Configura Supabase para guardar real.';
+        message.className = 'hb-alert warn';
+        message.style.display = 'block';
+        event.target.reset();
+        return;
+      }
+
+      try {
+        const client = window.HB.client();
+        const { error } = await client.from('inventory_items').upsert(item, { onConflict: 'code' });
+        if (error) throw error;
+        await load();
+        message.textContent = 'Inventario actualizado.';
+        message.className = 'hb-alert info';
+        message.style.display = 'block';
+        event.target.reset();
+      } catch (error) {
+        message.textContent = error.message || 'No se pudo guardar.';
+        message.className = 'hb-alert danger';
+        message.style.display = 'block';
+      }
+    });
+
+    load();
+  </script>
+</body>
+</html>
