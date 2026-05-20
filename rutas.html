@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rutas | Hello Balloons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hb-app.css" />
+</head>
+<body>
+  <nav class="hb-nav">
+    <div class="hb-nav-inner">
+      <a class="hb-brand" href="index.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Hello Balloons</span></a>
+      <div class="hb-nav-links">
+        <a href="index.html">Inicio</a>
+        <a href="cotizador.html">Cotizador</a>
+        <a href="inventario-app.html">Inventario</a>
+        <a class="active" href="rutas.html">Rutas</a>
+        <a href="admin.html">Admin</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="hb-section">
+    <div class="hb-container">
+      <div class="hb-section-header">
+        <div>
+          <div class="hb-eyebrow">Planificación diaria</div>
+          <h2>Rutas y horarios</h2>
+          <p class="hb-muted">Prototipo para ordenar eventos del día desde la base de El Palmar, estimar distancias y detectar horarios apretados.</p>
+        </div>
+        <button class="hb-button primary" id="calculateRoute">Calcular ruta local</button>
+      </div>
+
+      <div class="hb-grid-2">
+        <section class="hb-card pad">
+          <h3>Agregar parada</h3>
+          <form id="stopForm" class="hb-form">
+            <div class="hb-inline">
+              <div class="hb-field">
+                <label>Evento</label>
+                <input id="stopName" placeholder="Baby shower / cumpleaños..." />
+              </div>
+              <div class="hb-field">
+                <label>Tipo</label>
+                <select id="stopType">
+                  <option value="setup">Montaje</option>
+                  <option value="teardown">Desmontaje</option>
+                  <option value="delivery">Entrega</option>
+                  <option value="pickup">Recoger</option>
+                </select>
+              </div>
+            </div>
+            <div class="hb-inline">
+              <div class="hb-field">
+                <label>Hora límite de llegada</label>
+                <input id="arrivalTime" type="time" value="09:00" />
+              </div>
+              <div class="hb-field">
+                <label>Duración del servicio (min)</label>
+                <input id="serviceMinutes" type="number" value="90" min="10" step="10" />
+              </div>
+            </div>
+            <div class="hb-inline">
+              <div class="hb-field">
+                <label>Latitud</label>
+                <input id="stopLat" type="number" step="0.000001" placeholder="-17.7833" />
+              </div>
+              <div class="hb-field">
+                <label>Longitud</label>
+                <input id="stopLng" type="number" step="0.000001" placeholder="-63.1821" />
+              </div>
+            </div>
+            <div class="hb-field">
+              <label>Notas</label>
+              <textarea id="stopNotes" placeholder="Carga pesada, acceso difícil, llevar panel..."></textarea>
+            </div>
+            <button class="hb-button secondary" type="submit">Agregar parada</button>
+          </form>
+        </section>
+
+        <aside class="hb-card pad">
+          <h3>Resumen del día</h3>
+          <div class="hb-grid-2" style="margin-top:14px">
+            <div class="hb-kpi"><span>Paradas</span><strong id="stopsCount">0</strong></div>
+            <div class="hb-kpi"><span>Distancia aprox.</span><strong id="distanceTotal">0 km</strong></div>
+            <div class="hb-kpi"><span>Tiempo viaje</span><strong id="travelTotal">0 min</strong></div>
+            <div class="hb-kpi"><span>Riesgo</span><strong id="riskTotal">Pendiente</strong></div>
+          </div>
+          <div id="routeAdvice" class="hb-alert info" style="margin-top:18px">Agrega paradas y calcula una ruta local inicial.</div>
+          <div class="hb-alert warn" style="margin-top:18px">Esta pantalla ordena por hora límite. La optimización avanzada con tráfico real queda preparada para Google Routes/Route Optimization en Edge Functions.</div>
+        </aside>
+      </div>
+
+      <section class="hb-section">
+        <div class="hb-table-wrap">
+          <table class="hb-table">
+            <thead>
+              <tr>
+                <th>Orden</th>
+                <th>Evento</th>
+                <th>Tipo</th>
+                <th>Hora límite</th>
+                <th>Servicio</th>
+                <th>Viaje desde anterior</th>
+                <th>Riesgo</th>
+                <th>Notas</th>
+              </tr>
+            </thead>
+            <tbody id="routeTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/hb-core.js"></script>
+  <script>
+    const base = window.HB.baseLocation();
+    let stops = [
+      { name: 'Cumpleaños zona norte', type: 'setup', arrivalTime: '09:00', serviceMinutes: 120, latitude: -17.7602, longitude: -63.1750, notes: 'Montaje mediano' },
+      { name: 'Baby shower Equipetrol', type: 'setup', arrivalTime: '12:30', serviceMinutes: 90, latitude: -17.7699, longitude: -63.2034, notes: 'Llevar panel blanco' }
+    ];
+
+    function minutesFromHHMM(value) {
+      const [h, m] = String(value || '00:00').split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function hhmmFromMinutes(total) {
+      const h = Math.floor(total / 60).toString().padStart(2, '0');
+      const m = Math.round(total % 60).toString().padStart(2, '0');
+      return `${h}:${m}`;
+    }
+
+    function estimateTravel(origin, destination) {
+      const km = window.HB.haversineKm(origin, destination) * 1.25;
+      const minutes = Math.max(10, Math.round((km / 25) * 60));
+      return { km: Number(km.toFixed(2)), minutes };
+    }
+
+    function render(calculated = false) {
+      const sorted = [...stops].sort((a, b) => minutesFromHHMM(a.arrivalTime) - minutesFromHHMM(b.arrivalTime));
+      let previous = base;
+      let currentTime = null;
+      let totalKm = 0;
+      let totalMinutes = 0;
+      let redCount = 0;
+      let yellowCount = 0;
+
+      const rows = sorted.map((stop, index) => {
+        const travel = calculated ? estimateTravel(previous, stop) : { km: 0, minutes: 0 };
+        totalKm += travel.km;
+        totalMinutes += travel.minutes;
+        const arrivalLimit = minutesFromHHMM(stop.arrivalTime);
+        if (currentTime === null) currentTime = Math.max(0, arrivalLimit - travel.minutes);
+        else currentTime += travel.minutes;
+        const slack = arrivalLimit - currentTime;
+        const risk = !calculated ? 'pending' : slack < 0 ? 'rojo' : slack < 25 ? 'amarillo' : 'verde';
+        if (risk === 'rojo') redCount++;
+        if (risk === 'amarillo') yellowCount++;
+        const serviceEnd = Math.max(currentTime, arrivalLimit) + Number(stop.serviceMinutes || 0);
+        currentTime = serviceEnd;
+        previous = stop;
+        return `
+          <tr>
+            <td>${index + 1}</td>
+            <td><strong>${window.HB.escapeHtml(stop.name)}</strong></td>
+            <td>${window.HB.escapeHtml(stop.type)}</td>
+            <td>${window.HB.escapeHtml(stop.arrivalTime)}</td>
+            <td>${stop.serviceMinutes} min</td>
+            <td>${calculated ? `${travel.km} km / ${travel.minutes} min` : '-'}</td>
+            <td><span class="hb-status ${risk}">${risk}</span></td>
+            <td>${window.HB.escapeHtml(stop.notes || '')}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('routeTable').innerHTML = rows.join('');
+      document.getElementById('stopsCount').textContent = stops.length;
+      document.getElementById('distanceTotal').textContent = `${totalKm.toFixed(1)} km`;
+      document.getElementById('travelTotal').textContent = `${totalMinutes} min`;
+      const riskLabel = redCount ? 'Rojo' : yellowCount ? 'Amarillo' : calculated ? 'Verde' : 'Pendiente';
+      document.getElementById('riskTotal').textContent = riskLabel;
+      const advice = redCount
+        ? 'Hay al menos una parada con riesgo de atraso. Conviene adelantar montaje, agregar ayudante o separar equipo.'
+        : yellowCount
+          ? 'La ruta es posible, pero con poco margen. Revisar carga, tráfico y tiempo de desmontaje.'
+          : calculated
+            ? 'Ruta inicial viable con los horarios cargados.'
+            : 'Agrega paradas y calcula una ruta local inicial.';
+      document.getElementById('routeAdvice').className = `hb-alert ${redCount ? 'danger' : yellowCount ? 'warn' : 'info'}`;
+      document.getElementById('routeAdvice').textContent = advice;
+    }
+
+    document.getElementById('stopForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      stops.push({
+        name: document.getElementById('stopName').value.trim() || 'Evento sin nombre',
+        type: document.getElementById('stopType').value,
+        arrivalTime: document.getElementById('arrivalTime').value || '09:00',
+        serviceMinutes: Number(document.getElementById('serviceMinutes').value || 60),
+        latitude: Number(document.getElementById('stopLat').value || base.latitude),
+        longitude: Number(document.getElementById('stopLng').value || base.longitude),
+        notes: document.getElementById('stopNotes').value.trim()
+      });
+      event.target.reset();
+      render(false);
+    });
+
+    document.getElementById('calculateRoute').addEventListener('click', () => render(true));
+    render(false);
+  </script>
+</body>
+</html>
