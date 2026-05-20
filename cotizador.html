@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotizador | Hello Balloons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hb-app.css" />
+</head>
+<body>
+  <nav class="hb-nav">
+    <div class="hb-nav-inner">
+      <a class="hb-brand" href="index.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Hello Balloons</span></a>
+      <div class="hb-nav-links">
+        <a href="index.html">Inicio</a>
+        <a class="active" href="cotizador.html">Cotizador</a>
+        <a href="inventario-app.html">Inventario</a>
+        <a href="rutas.html">Rutas</a>
+        <a href="admin.html">Admin</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="hb-section">
+    <div class="hb-container">
+      <div class="hb-section-header">
+        <div>
+          <div class="hb-eyebrow">Prototipo operativo</div>
+          <h2>Cotizador rentable</h2>
+          <p class="hb-muted">Calcula costos, transporte aproximado desde El Palmar, precio mínimo y semáforo de margen.</p>
+        </div>
+      </div>
+
+      <div class="hb-grid-2">
+        <section class="hb-card pad">
+          <form id="quoteForm" class="hb-form">
+            <div class="hb-inline">
+              <div class="hb-field">
+                <label>Cliente</label>
+                <input id="clientName" placeholder="Nombre del cliente" />
+              </div>
+              <div class="hb-field">
+                <label>WhatsApp</label>
+                <input id="clientPhone" placeholder="Ej. 71621501" />
+              </div>
+            </div>
+
+            <div class="hb-inline">
+              <div class="hb-field">
+                <label>Tipo de evento</label>
+                <select id="eventType">
+                  <option>Cumpleaños</option>
+                  <option>Baby shower</option>
+                  <option>Bautizo</option>
+                  <option>Revelación</option>
+                  <option>Graduación</option>
+                  <option>Corporativo</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+              <div class="hb-field">
+                <label>Fecha</label>
+                <input id="eventDate" type="date" />
+              </div>
+            </div>
+
+            <div class="hb-inline">
+              <div class="hb-field">
+                <label>Latitud destino</label>
+                <input id="destLat" type="number" step="0.000001" placeholder="-17.7833" />
+              </div>
+              <div class="hb-field">
+                <label>Longitud destino</label>
+                <input id="destLng" type="number" step="0.000001" placeholder="-63.1821" />
+              </div>
+            </div>
+
+            <div class="hb-inline">
+              <div class="hb-field">
+                <label>Carga</label>
+                <select id="loadType">
+                  <option value="light">Liviana</option>
+                  <option value="medium" selected>Media</option>
+                  <option value="heavy">Pesada</option>
+                </select>
+              </div>
+              <div class="hb-field">
+                <label>Precio final que quieres cobrar</label>
+                <input id="finalPrice" type="number" min="0" step="1" value="0" />
+              </div>
+            </div>
+
+            <div class="hb-inline">
+              <div class="hb-field">
+                <label>Materiales</label>
+                <input id="materialsCost" type="number" min="0" step="1" value="250" />
+              </div>
+              <div class="hb-field">
+                <label>Personal</label>
+                <input id="staffCost" type="number" min="0" step="1" value="160" />
+              </div>
+            </div>
+
+            <div class="hb-inline">
+              <div class="hb-field">
+                <label>Alquiler externo</label>
+                <input id="rentalCost" type="number" min="0" step="1" value="0" />
+              </div>
+              <div class="hb-field">
+                <label>Pintura / mantenimiento</label>
+                <input id="maintenanceCost" type="number" min="0" step="1" value="0" />
+              </div>
+            </div>
+
+            <div class="hb-field">
+              <label>Extras / imprevistos</label>
+              <input id="extraCost" type="number" min="0" step="1" value="50" />
+            </div>
+
+            <div class="hb-field">
+              <label>Notas para IA / WhatsApp</label>
+              <textarea id="notes" placeholder="Tema, colores, horario, detalles, presupuesto del cliente..."></textarea>
+            </div>
+
+            <div class="hb-actions">
+              <button class="hb-button primary" type="submit">Calcular</button>
+              <button class="hb-button secondary" type="button" id="copyMessage">Copiar mensaje WhatsApp</button>
+            </div>
+          </form>
+        </section>
+
+        <aside class="hb-card pad">
+          <h3>Resultado</h3>
+          <div class="hb-grid-2" style="margin-top:14px">
+            <div class="hb-kpi"><span>Transporte sugerido</span><strong id="transportOut">Bs. 0</strong><small class="hb-muted" id="distanceOut">Sin destino</small></div>
+            <div class="hb-kpi"><span>Costo total</span><strong id="costOut">Bs. 0</strong><small class="hb-muted">incluye transporte</small></div>
+            <div class="hb-kpi"><span>Precio mínimo 50/50</span><strong id="minimumOut">Bs. 0</strong><small class="hb-muted">costo ÷ 0.5</small></div>
+            <div class="hb-kpi"><span>Margen</span><strong id="marginOut">0%</strong><small id="profitOut" class="hb-muted">Ganancia Bs. 0</small></div>
+          </div>
+          <div id="statusOut" class="hb-alert info" style="margin-top:18px">Completa los datos y calcula.</div>
+          <div class="hb-alert warn" style="margin-top:18px">
+            Este prototipo calcula localmente si no está desplegada la Edge Function. Cuando Supabase Functions esté activo, el transporte usará `transport-estimate`.
+          </div>
+          <h3 style="margin-top:22px">Mensaje sugerido</h3>
+          <div id="messageOut" class="hb-alert info">Aquí aparecerá el mensaje para el cliente.</div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/hb-core.js"></script>
+  <script>
+    let lastMessage = '';
+
+    function n(id) { return Number(document.getElementById(id).value || 0); }
+
+    async function calculate(event) {
+      event.preventDefault();
+      const destination = {
+        latitude: n('destLat'),
+        longitude: n('destLng')
+      };
+      const loadType = document.getElementById('loadType').value;
+      let transport = { suggestedCost: 0, distanceKmOneWay: 0, roundTripKm: 0, provider: 'sin_destino' };
+
+      if (destination.latitude && destination.longitude) {
+        try {
+          if (window.HB.isConfigured()) {
+            const remote = await window.HB.invoke('transport-estimate', { destination, loadType, useGoogleRoutes: true });
+            transport = remote.calculation || remote.estimate || transport;
+            transport.suggestedCost = Number(transport.suggestedCost || remote.estimate?.suggested_cost || 0);
+          } else {
+            transport = window.HB.transportFallback({ destination, loadType });
+          }
+        } catch (error) {
+          transport = window.HB.transportFallback({ destination, loadType });
+        }
+      }
+
+      const totalCost = n('materialsCost') + n('staffCost') + n('rentalCost') + n('maintenanceCost') + n('extraCost') + Number(transport.suggestedCost || 0);
+      const desiredFinal = n('finalPrice');
+      const minimumPrice = window.HB.roundTo(totalCost * 2, 10);
+      const finalPrice = desiredFinal || minimumPrice;
+      const margin = window.HB.margin(totalCost, finalPrice, 0.5);
+
+      document.getElementById('transportOut').textContent = window.HB.money(transport.suggestedCost);
+      document.getElementById('distanceOut').textContent = transport.roundTripKm ? `${transport.roundTripKm} km ida y vuelta aprox.` : 'Sin destino';
+      document.getElementById('costOut').textContent = window.HB.money(totalCost);
+      document.getElementById('minimumOut').textContent = window.HB.money(minimumPrice);
+      document.getElementById('marginOut').textContent = `${Math.round(margin.marginPercent * 100)}%`;
+      document.getElementById('profitOut').textContent = `Ganancia ${window.HB.money(finalPrice - totalCost)}`;
+
+      const status = margin.status;
+      const statusText = status === 'verde'
+        ? 'Rentable: cumple la regla 50/50.'
+        : status === 'amarillo'
+          ? 'Cuidado: margen aceptable pero por debajo del objetivo 50/50.'
+          : 'Riesgo: este precio no cubre adecuadamente la ganancia objetivo.';
+      document.getElementById('statusOut').className = `hb-alert ${status === 'rojo' ? 'danger' : status === 'amarillo' ? 'warn' : 'info'}`;
+      document.getElementById('statusOut').innerHTML = `<span class="hb-status ${status}">${status}</span> ${statusText}`;
+
+      const clientName = document.getElementById('clientName').value || 'Hola';
+      const eventType = document.getElementById('eventType').value;
+      lastMessage = `${clientName}, gracias por escribir a Hello Balloons. Para tu ${eventType}, la cotización sugerida es de ${window.HB.money(finalPrice)}. Incluye costos de materiales, personal y transporte estimado. Para reservar la fecha necesitamos confirmar horario, ubicación exacta y detalles de colores/temática.`;
+      document.getElementById('messageOut').textContent = lastMessage;
+    }
+
+    document.getElementById('quoteForm').addEventListener('submit', calculate);
+    document.getElementById('copyMessage').addEventListener('click', async () => {
+      if (!lastMessage) return;
+      await navigator.clipboard.writeText(lastMessage);
+      alert('Mensaje copiado.');
+    });
+  </script>
+</body>
+</html>
