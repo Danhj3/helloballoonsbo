@@ -3,352 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard | Hello Balloons</title>
+  <title>Analytics | Hello Balloons</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="assets/css/hb-app.css" />
   <link rel="stylesheet" href="assets/css/hb-public.css" />
   <style>
-    .hb-danger-button{background:#fff;color:#a1284b;border:1px solid rgba(226,85,123,.28);box-shadow:none}.hb-danger-button:hover{background:#fff6f8}
-    .hb-toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin:20px 0}.hb-toolbar input,.hb-toolbar select{border:1px solid #dfe5e8;border-radius:999px;padding:12px 14px;font:inherit;background:#fff;min-width:180px}.hb-toolbar .hb-tools{display:flex;gap:10px;flex-wrap:wrap}
-    .hb-orders-list{display:grid;gap:12px}.hb-order-row{display:grid;grid-template-columns:1.3fr .9fr .8fr auto;gap:14px;align-items:center;border:1px solid var(--hb-line);border-radius:20px;padding:16px;background:#fff;box-shadow:0 8px 22px rgba(38,50,56,.04)}.hb-order-row strong{display:block}.hb-order-row small{display:block;color:var(--hb-muted);margin-top:4px}.hb-order-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.hb-order-actions select{border:1px solid #dfe5e8;border-radius:999px;padding:10px 12px;font:inherit;background:#fff}.hb-order-location{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .hb-record-list{display:grid;gap:10px}.hb-record{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid var(--hb-line);border-radius:18px;padding:14px;background:#fff}.hb-record strong{display:block}.hb-record small{color:var(--hb-muted)}.hb-record-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .hb-modal-backdrop{position:fixed;inset:0;background:rgba(38,50,56,.42);z-index:80;display:none;align-items:center;justify-content:center;padding:18px}.hb-modal-backdrop.open{display:flex}.hb-modal{width:min(760px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:28px;box-shadow:0 24px 80px rgba(0,0,0,.25);padding:24px}.hb-modal-header{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:16px}.hb-modal-header h3{margin:0;font-size:1.6rem;letter-spacing:-.04em}.hb-close{border:0;background:#f4f6f7;border-radius:999px;width:40px;height:40px;font-weight:900;cursor:pointer}
-    @media(max-width:900px){.hb-order-row{grid-template-columns:1fr}.hb-order-actions{justify-content:flex-start}.hb-record{align-items:flex-start;flex-direction:column}.hb-record-actions{width:100%;justify-content:flex-start}.hb-toolbar input,.hb-toolbar select{width:100%}.hb-toolbar .hb-tools{width:100%}}
+    #eventsMap{height:420px;border-radius:24px;overflow:hidden;border:1px solid var(--hb-line);background:#fff}.hb-danger-button{background:#fff;color:#a1284b;border:1px solid rgba(226,85,123,.28);box-shadow:none}.hb-toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin:20px 0}.hb-toolbar input,.hb-toolbar select{border:1px solid #dfe5e8;border-radius:999px;padding:12px 14px;font:inherit;background:#fff;min-width:175px}.hb-tools{display:flex;gap:10px;flex-wrap:wrap}.hb-orders-list{display:grid;gap:12px}.hb-order-row{display:grid;grid-template-columns:1.25fr .85fr .8fr auto;gap:14px;align-items:center;border:1px solid var(--hb-line);border-radius:20px;padding:16px;background:#fff;box-shadow:0 8px 22px rgba(38,50,56,.04)}.hb-order-row strong{display:block}.hb-order-row small{display:block;color:var(--hb-muted);margin-top:4px}.hb-order-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.hb-order-location{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hb-chart-bars{display:grid;gap:9px;margin-top:12px}.hb-bar-row{display:grid;grid-template-columns:120px 1fr 50px;gap:10px;align-items:center}.hb-bar-track{height:12px;border-radius:999px;background:#f0f2f4;overflow:hidden}.hb-bar-fill{height:100%;background:linear-gradient(90deg,var(--hb-pink),var(--hb-teal));border-radius:999px}.hb-modal-backdrop{position:fixed;inset:0;background:rgba(38,50,56,.42);z-index:80;display:none;align-items:center;justify-content:center;padding:18px}.hb-modal-backdrop.open{display:flex}.hb-modal{width:min(760px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:28px;box-shadow:0 24px 80px rgba(0,0,0,.25);padding:24px}.hb-modal-header{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:16px}.hb-modal-header h3{margin:0;font-size:1.6rem;letter-spacing:-.04em}.hb-close{border:0;background:#f4f6f7;border-radius:999px;width:40px;height:40px;font-weight:900;cursor:pointer}@media(max-width:900px){.hb-order-row{grid-template-columns:1fr}.hb-order-actions{justify-content:flex-start}.hb-toolbar input,.hb-toolbar select{width:100%}.hb-tools{width:100%}.hb-bar-row{grid-template-columns:88px 1fr 42px}}
   </style>
 </head>
 <body>
-  <nav class="hb-nav">
-    <div class="hb-nav-inner">
-      <a class="hb-brand" href="dashboard.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Dashboard</span></a>
-      <div class="hb-nav-links">
-        <a class="active" href="dashboard.html">Inicio</a>
-        <a href="admin-galeria.html">Galería</a>
-        <a href="inventario-app.html">Inventario</a>
-        <a href="rutas.html">Rutas</a>
-        <a href="cotizador.html">Cotizador</a>
-        <a href="memoria-eventos.html">Memoria</a>
-        <a href="index.html">Web pública</a>
-      </div>
+  <nav class="hb-nav"><div class="hb-nav-inner"><a class="hb-brand" href="dashboard.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Dashboard</span></a><div class="hb-nav-links"><a class="active" href="dashboard.html">Analytics</a><a href="admin-galeria.html">Galería</a><a href="inventario-app.html">Inventario</a><a href="rutas.html">Rutas</a><a href="cotizador.html">Cotizador</a><a href="memoria-eventos.html">Memoria</a><a href="index.html">Web pública</a></div></div></nav>
+
+  <main class="hb-section"><div class="hb-container">
+    <div id="loginRequired" class="hb-card pad" style="display:none"><h2>Necesitas iniciar sesión</h2><p class="hb-muted">Este panel es interno.</p><a class="hb-button pink" href="login.html">Ir al login</a></div>
+    <div id="dashboardPanel" style="display:none">
+      <div class="hb-section-header"><div><div class="hb-eyebrow">Analytics</div><h2>Seguimiento del negocio</h2><p class="hb-muted">Ingresos, costos, transporte, solicitudes, ubicaciones y actividad operativa.</p></div><button id="logoutButton" class="hb-button secondary" type="button">Salir</button></div>
+      <div class="hb-toolbar"><div class="hb-tools"><input id="searchOrders" placeholder="Buscar cliente, evento o código" /><select id="monthFilter"><option value="">Todos los meses</option></select><select id="typeFilter"><option value="">Todos los eventos</option></select><select id="statusFilter"><option value="">Todos los estados</option><option value="new">Nuevo</option><option value="contacted">Contactado</option><option value="quoted">Cotizado</option><option value="confirmed">Confirmado</option><option value="completed">Completado</option><option value="cancelled">Cancelado</option></select></div><div class="hb-tools"><button id="exportCsv" class="hb-button primary" type="button">Exportar Excel</button><button id="refreshLists" class="hb-button secondary" type="button">Actualizar</button></div></div>
+      <div class="hb-grid-4" style="margin-bottom:18px"><div class="hb-kpi"><span>Ingresos estimados</span><strong id="kpiIncome">Bs. 0</strong></div><div class="hb-kpi"><span>Costos registrados</span><strong id="kpiCosts">Bs. 0</strong></div><div class="hb-kpi"><span>Transporte</span><strong id="kpiTransport">Bs. 0</strong></div><div class="hb-kpi"><span>Utilidad estimada</span><strong id="kpiProfit">Bs. 0</strong></div></div>
+      <div class="hb-grid-4" style="margin-bottom:24px"><div class="hb-kpi"><span>Solicitudes</span><strong id="kpiOrders">0</strong></div><div class="hb-kpi"><span>Confirmadas</span><strong id="kpiConfirmed">0</strong></div><div class="hb-kpi"><span>Canceladas</span><strong id="kpiCancelled">0</strong></div><div class="hb-kpi"><span>Ticket promedio</span><strong id="kpiTicket">Bs. 0</strong></div></div>
+      <div class="hb-grid-2"><section class="hb-card pad"><h3>Eventos por tipo</h3><div id="typeChart" class="hb-chart-bars"></div></section><section class="hb-card pad"><h3>Solicitudes por mes</h3><div id="monthChart" class="hb-chart-bars"></div></section></div>
+      <section class="hb-section"><div class="hb-section-header"><div><h2>Mapa de eventos</h2><p class="hb-muted">Se muestran ubicaciones con coordenadas o links de Google Maps que puedan leerse.</p></div></div><div id="eventsMap"></div></section>
+      <section class="hb-card pad"><div class="hb-section-header" style="margin-bottom:0"><div><h2>Solicitudes recibidas</h2><p class="hb-muted">Edita, corrige, cambia estado o borra registros incorrectos.</p></div></div><div id="message" class="hb-alert info" style="display:none;margin:18px 0"></div><div id="ordersList" class="hb-orders-list"><p class="hb-muted">Cargando...</p></div></section>
     </div>
-  </nav>
-
-  <main class="hb-section">
-    <div class="hb-container">
-      <div id="loginRequired" class="hb-card pad" style="display:none">
-        <h2>Necesitas iniciar sesión</h2>
-        <p class="hb-muted">Este panel es interno.</p>
-        <a class="hb-button pink" href="login.html">Ir al login</a>
-      </div>
-
-      <div id="dashboardPanel" style="display:none">
-        <div class="hb-section-header">
-          <div>
-            <div class="hb-eyebrow">Panel interno</div>
-            <h2>Seguimiento de solicitudes</h2>
-            <p class="hb-muted">Revisa, corrige, actualiza estado o elimina solicitudes y registros cargados por error.</p>
-          </div>
-          <button id="logoutButton" class="hb-button secondary" type="button">Salir</button>
-        </div>
-
-        <div class="hb-grid-4" style="margin-bottom:18px">
-          <div class="hb-kpi"><span>Solicitudes nuevas</span><strong id="newOrders">0</strong></div>
-          <div class="hb-kpi"><span>Fotos públicas</span><strong id="publicPhotos">0</strong></div>
-          <div class="hb-kpi"><span>Inventario</span><strong id="inventoryCount">0</strong></div>
-          <div class="hb-kpi"><span>Cotizaciones</span><strong id="quotesCount">0</strong></div>
-        </div>
-
-        <section class="hb-card pad">
-          <div class="hb-section-header" style="margin-bottom:0">
-            <div>
-              <h2>Solicitudes recibidas</h2>
-              <p class="hb-muted">Aquí puedes hacer seguimiento y corregir cualquier dato del pedido.</p>
-            </div>
-          </div>
-          <div class="hb-toolbar">
-            <div class="hb-tools">
-              <input id="searchOrders" placeholder="Buscar cliente, evento o código" />
-              <select id="statusFilter">
-                <option value="">Todos los estados</option>
-                <option value="new">Nuevo</option>
-                <option value="contacted">Contactado</option>
-                <option value="quoted">Cotizado</option>
-                <option value="confirmed">Confirmado</option>
-                <option value="completed">Completado</option>
-                <option value="cancelled">Cancelado</option>
-              </select>
-            </div>
-            <button id="refreshLists" class="hb-button secondary" type="button">Actualizar</button>
-          </div>
-          <div id="deleteMessage" class="hb-alert info" style="display:none;margin-bottom:18px"></div>
-          <div id="ordersList" class="hb-orders-list"><p class="hb-muted">Cargando...</p></div>
-        </section>
-
-        <section class="hb-section">
-          <div class="hb-section-header">
-            <div>
-              <h2>Otros registros recientes</h2>
-              <p class="hb-muted">Para limpiar datos de prueba en galería, inventario o cotizaciones.</p>
-            </div>
-          </div>
-          <div class="hb-grid-3">
-            <article class="hb-card pad">
-              <h3>Eventos de galería / memoria</h3>
-              <div id="memoriesList" class="hb-record-list"><p class="hb-muted">Cargando...</p></div>
-            </article>
-            <article class="hb-card pad">
-              <h3>Inventario reciente</h3>
-              <div id="inventoryList" class="hb-record-list"><p class="hb-muted">Cargando...</p></div>
-            </article>
-            <article class="hb-card pad">
-              <h3>Cotizaciones recientes</h3>
-              <div id="quotesList" class="hb-record-list"><p class="hb-muted">Cargando...</p></div>
-            </article>
-          </div>
-        </section>
-      </div>
-    </div>
-  </main>
-
-  <div id="editModal" class="hb-modal-backdrop">
-    <div class="hb-modal">
-      <div class="hb-modal-header">
-        <div>
-          <h3>Editar solicitud</h3>
-          <p class="hb-muted" id="editOrderNumber">Actualiza los datos necesarios.</p>
-        </div>
-        <button class="hb-close" id="closeModal" type="button">×</button>
-      </div>
-      <form id="editOrderForm" class="hb-form">
-        <input id="editOrderId" type="hidden" />
-        <div class="hb-inline">
-          <div class="hb-field"><label>Cliente</label><input id="editClientName" /></div>
-          <div class="hb-field"><label>WhatsApp</label><input id="editClientPhone" /></div>
-        </div>
-        <div class="hb-inline">
-          <div class="hb-field"><label>Tipo de evento</label><input id="editEventType" /></div>
-          <div class="hb-field"><label>Fecha</label><input id="editEventDate" type="date" /></div>
-        </div>
-        <div class="hb-inline">
-          <div class="hb-field"><label>Presupuesto deseado</label><input id="editDesiredBudget" type="number" min="0" step="1" /></div>
-          <div class="hb-field"><label>Estado</label><select id="editStatus"><option value="new">Nuevo</option><option value="contacted">Contactado</option><option value="quoted">Cotizado</option><option value="confirmed">Confirmado</option><option value="completed">Completado</option><option value="cancelled">Cancelado</option></select></div>
-        </div>
-        <div class="hb-field"><label>Ubicación / link de Google Maps</label><textarea id="editEventAddress"></textarea></div>
-        <div class="hb-field"><label>Notas del pedido</label><textarea id="editNotes" style="min-height:160px"></textarea></div>
-        <div class="hb-actions">
-          <button class="hb-button pink" type="submit">Guardar cambios</button>
-          <button class="hb-button secondary" id="cancelEdit" type="button">Cancelar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase-config.js?v=dashboard-clean"></script>
-  <script src="assets/js/hb-core.js?v=dashboard-clean"></script>
+  </div></main>
+  <div id="editModal" class="hb-modal-backdrop"><div class="hb-modal"><div class="hb-modal-header"><div><h3>Editar solicitud</h3><p class="hb-muted" id="editOrderNumber">Actualiza los datos necesarios.</p></div><button class="hb-close" id="closeModal" type="button">×</button></div><form id="editOrderForm" class="hb-form"><input id="editOrderId" type="hidden" /><div class="hb-inline"><div class="hb-field"><label>Cliente</label><input id="editClientName" /></div><div class="hb-field"><label>WhatsApp</label><input id="editClientPhone" /></div></div><div class="hb-inline"><div class="hb-field"><label>Tipo de evento</label><input id="editEventType" /></div><div class="hb-field"><label>Fecha</label><input id="editEventDate" type="date" /></div></div><div class="hb-inline"><div class="hb-field"><label>Presupuesto / ingreso estimado</label><input id="editDesiredBudget" type="number" min="0" step="1" /></div><div class="hb-field"><label>Estado</label><select id="editStatus"><option value="new">Nuevo</option><option value="contacted">Contactado</option><option value="quoted">Cotizado</option><option value="confirmed">Confirmado</option><option value="completed">Completado</option><option value="cancelled">Cancelado</option></select></div></div><div class="hb-field"><label>Ubicación / link de Google Maps</label><textarea id="editEventAddress"></textarea></div><div class="hb-field"><label>Notas del pedido</label><textarea id="editNotes" style="min-height:160px"></textarea></div><div class="hb-actions"><button class="hb-button pink" type="submit">Guardar cambios</button><button class="hb-button secondary" id="cancelEdit" type="button">Cancelar</button></div></form></div></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="assets/js/supabase-config.js?v=analytics3"></script><script src="assets/js/hb-core.js?v=analytics3"></script>
   <script>
-    let allOrders = [];
-
-    async function countTable(table, queryFn) {
-      const client = window.HB.client();
-      if (!client) return 0;
-      let query = client.from(table).select('id', { count: 'exact', head: true });
-      if (queryFn) query = queryFn(query);
-      const { count } = await query;
-      return count || 0;
-    }
-
-    function showMessage(text, kind = 'info') {
-      const box = document.getElementById('deleteMessage');
-      box.className = `hb-alert ${kind}`;
-      box.textContent = text;
-      box.style.display = 'block';
-    }
-
-    function statusLabel(status) {
-      return ({ new:'Nuevo', contacted:'Contactado', quoted:'Cotizado', confirmed:'Confirmado', completed:'Completado', cancelled:'Cancelado' })[status] || status || 'Nuevo';
-    }
-
-    function statusClass(status) {
-      if (['confirmed','completed'].includes(status)) return 'verde';
-      if (['contacted','quoted'].includes(status)) return 'amarillo';
-      if (status === 'cancelled') return 'rojo';
-      return 'pending';
-    }
-
-    function mapsLink(text) {
-      if (!text) return '';
-      const url = String(text).match(/https?:\/\/[^\s]+/);
-      return url ? url[0] : '';
-    }
-
-    function recordHtml({ title, subtitle, table, id, openHref }) {
-      return `<div class="hb-record"><div><strong>${window.HB.escapeHtml(title || 'Sin título')}</strong><small>${window.HB.escapeHtml(subtitle || '')}</small></div><div class="hb-record-actions">${openHref ? `<a class="hb-button secondary" href="${openHref}">Abrir</a>` : ''}<button class="hb-button hb-danger-button" type="button" data-delete-table="${table}" data-delete-id="${id}">Borrar</button></div></div>`;
-    }
-
-    function orderRow(order) {
-      const link = mapsLink(order.event_address || order.notes || '');
-      return `
-        <div class="hb-order-row">
-          <div>
-            <strong>${window.HB.escapeHtml(order.order_number || 'Solicitud')}</strong>
-            <small>${window.HB.escapeHtml(order.client_name || 'Sin cliente')} · ${window.HB.escapeHtml(order.client_phone || 'Sin teléfono')}</small>
-          </div>
-          <div>
-            <strong>${window.HB.escapeHtml(order.event_type || 'Evento')}</strong>
-            <small>${window.HB.escapeHtml(order.event_date || 'Sin fecha')} ${order.desired_budget ? '· ' + window.HB.money(order.desired_budget) : ''}</small>
-          </div>
-          <div>
-            <span class="hb-status ${statusClass(order.status)}">${statusLabel(order.status)}</span>
-            <small class="hb-order-location">${window.HB.escapeHtml(order.event_address || 'Sin ubicación')}</small>
-            ${link ? `<small><a class="hb-small-link" href="${window.HB.escapeAttr(link)}" target="_blank" rel="noopener">Abrir ubicación</a></small>` : ''}
-          </div>
-          <div class="hb-order-actions">
-            <button class="hb-button secondary" data-edit-order="${order.id}" type="button">Editar</button>
-            <button class="hb-button hb-danger-button" data-delete-table="orders" data-delete-id="${order.id}" type="button">Borrar</button>
-          </div>
-        </div>`;
-    }
-
-    function applyOrderFilters() {
-      const text = document.getElementById('searchOrders').value.toLowerCase().trim();
-      const status = document.getElementById('statusFilter').value;
-      const filtered = allOrders.filter(order => {
-        const blob = `${order.order_number || ''} ${order.client_name || ''} ${order.client_phone || ''} ${order.event_type || ''} ${order.event_address || ''} ${order.notes || ''}`.toLowerCase();
-        return (!text || blob.includes(text)) && (!status || order.status === status);
-      });
-      document.getElementById('ordersList').innerHTML = filtered.length ? filtered.map(orderRow).join('') : '<div class="hb-alert warn">No hay solicitudes con esos filtros.</div>';
-    }
-
-    async function loadDashboardCounts() {
-      try {
-        document.getElementById('newOrders').textContent = await countTable('orders', q => q.eq('status', 'new'));
-        document.getElementById('publicPhotos').textContent = await countTable('event_memory_photos', q => q.eq('is_public', true));
-        document.getElementById('inventoryCount').textContent = await countTable('inventory_items');
-        document.getElementById('quotesCount').textContent = await countTable('quotes');
-      } catch (error) {}
-    }
-
-    async function loadCleanupLists() {
-      const client = window.HB.client();
-      if (!client) {
-        ['ordersList','memoriesList','inventoryList','quotesList'].forEach(id => document.getElementById(id).innerHTML = '<p class="hb-muted">Conecta Supabase para ver registros reales.</p>');
-        return;
-      }
-
-      try {
-        const [{ data: orders }, { data: memories }, { data: inventory }, { data: quotes }] = await Promise.all([
-          client.from('orders').select('id, order_number, client_name, client_phone, event_type, event_date, event_address, desired_budget, notes, status, created_at').order('created_at', { ascending:false }).limit(50),
-          client.from('event_memories').select('id, title, public_title, event_type, event_date, is_public, created_at').order('created_at', { ascending:false }).limit(8),
-          client.from('inventory_items').select('id, code, name, current_status, current_color, updated_at').order('updated_at', { ascending:false }).limit(8),
-          client.from('quotes').select('id, quote_number, status, final_price, suggested_price, created_at').order('created_at', { ascending:false }).limit(8)
-        ]);
-
-        allOrders = orders || [];
-        applyOrderFilters();
-        document.getElementById('memoriesList').innerHTML = (memories || []).length ? memories.map(m => recordHtml({ title: m.public_title || m.title, subtitle: `${m.event_type || 'Evento'} · ${m.is_public ? 'Público' : 'Privado'}`, table:'event_memories', id:m.id, openHref:'admin-galeria.html' })).join('') : '<p class="hb-muted">No hay eventos guardados.</p>';
-        document.getElementById('inventoryList').innerHTML = (inventory || []).length ? inventory.map(i => recordHtml({ title: `${i.code || ''} ${i.name || 'Ítem'}`, subtitle: `${i.current_status || ''} · ${i.current_color || 'Sin color'}`, table:'inventory_items', id:i.id, openHref:'inventario-app.html' })).join('') : '<p class="hb-muted">No hay inventario.</p>';
-        document.getElementById('quotesList').innerHTML = (quotes || []).length ? quotes.map(q => recordHtml({ title: q.quote_number || 'Cotización', subtitle: `${q.status || ''} · ${q.final_price || q.suggested_price || 0} Bs.`, table:'quotes', id:q.id, openHref:'cotizador.html' })).join('') : '<p class="hb-muted">No hay cotizaciones.</p>';
-      } catch (error) {
-        showMessage(error.message || 'No se pudieron cargar las listas.', 'danger');
-      }
-    }
-
-    function openEditModal(orderId) {
-      const order = allOrders.find(item => item.id === orderId);
-      if (!order) return;
-      document.getElementById('editOrderId').value = order.id;
-      document.getElementById('editOrderNumber').textContent = order.order_number || 'Solicitud';
-      document.getElementById('editClientName').value = order.client_name || '';
-      document.getElementById('editClientPhone').value = order.client_phone || '';
-      document.getElementById('editEventType').value = order.event_type || '';
-      document.getElementById('editEventDate').value = order.event_date || '';
-      document.getElementById('editDesiredBudget').value = order.desired_budget || '';
-      document.getElementById('editStatus').value = order.status || 'new';
-      document.getElementById('editEventAddress').value = order.event_address || '';
-      document.getElementById('editNotes').value = order.notes || '';
-      document.getElementById('editModal').classList.add('open');
-    }
-
-    function closeEditModal() {
-      document.getElementById('editModal').classList.remove('open');
-    }
-
-    async function saveOrderEdit(event) {
-      event.preventDefault();
-      const client = window.HB.client();
-      const id = document.getElementById('editOrderId').value;
-      const payload = {
-        client_name: document.getElementById('editClientName').value.trim() || null,
-        client_phone: document.getElementById('editClientPhone').value.trim() || null,
-        event_type: document.getElementById('editEventType').value.trim() || null,
-        event_date: document.getElementById('editEventDate').value || null,
-        event_address: document.getElementById('editEventAddress').value.trim() || null,
-        desired_budget: document.getElementById('editDesiredBudget').value ? Number(document.getElementById('editDesiredBudget').value) : null,
-        status: document.getElementById('editStatus').value,
-        notes: document.getElementById('editNotes').value.trim() || null
-      };
-      const { error } = await client.from('orders').update(payload).eq('id', id);
-      if (error) throw error;
-      closeEditModal();
-      showMessage('Solicitud actualizada correctamente.', 'info');
-      await loadDashboardCounts();
-      await loadCleanupLists();
-    }
-
-    async function deleteRecord(table, id) {
-      const labels = { orders:'solicitud', event_memories:'evento de galería/memoria', inventory_items:'ítem de inventario', quotes:'cotización' };
-      const ok = confirm(`¿Borrar esta ${labels[table] || 'registro'}? Esta acción no se puede deshacer.`);
-      if (!ok) return;
-      const client = window.HB.client();
-      const { error } = await client.from(table).delete().eq('id', id);
-      if (error) throw error;
-      showMessage('Registro borrado correctamente.', 'info');
-      await loadDashboardCounts();
-      await loadCleanupLists();
-    }
-
-    document.addEventListener('click', async (event) => {
-      const editBtn = event.target.closest('[data-edit-order]');
-      const deleteBtn = event.target.closest('[data-delete-table]');
-      try {
-        if (editBtn) openEditModal(editBtn.dataset.editOrder);
-        if (deleteBtn) await deleteRecord(deleteBtn.dataset.deleteTable, deleteBtn.dataset.deleteId);
-      } catch (error) {
-        showMessage(error.message || 'No se pudo realizar la acción.', 'danger');
-      }
-    });
-
-    async function init() {
-      if (!window.HB.isConfigured()) {
-        document.getElementById('loginRequired').style.display = 'none';
-        document.getElementById('dashboardPanel').style.display = 'block';
-        await loadCleanupLists();
-        return;
-      }
-      const session = await window.HB.getSession();
-      if (!session) {
-        document.getElementById('loginRequired').style.display = 'block';
-        document.getElementById('dashboardPanel').style.display = 'none';
-        return;
-      }
-      document.getElementById('loginRequired').style.display = 'none';
-      document.getElementById('dashboardPanel').style.display = 'block';
-      await loadDashboardCounts();
-      await loadCleanupLists();
-    }
-
-    document.getElementById('refreshLists').addEventListener('click', async () => { await loadDashboardCounts(); await loadCleanupLists(); });
-    document.getElementById('searchOrders').addEventListener('input', applyOrderFilters);
-    document.getElementById('statusFilter').addEventListener('change', applyOrderFilters);
-    document.getElementById('closeModal').addEventListener('click', closeEditModal);
-    document.getElementById('cancelEdit').addEventListener('click', closeEditModal);
-    document.getElementById('editModal').addEventListener('click', (event) => { if (event.target.id === 'editModal') closeEditModal(); });
-    document.getElementById('editOrderForm').addEventListener('submit', async (event) => { try { await saveOrderEdit(event); } catch (error) { showMessage(error.message || 'No se pudo guardar la solicitud.', 'danger'); } });
-    document.getElementById('logoutButton').addEventListener('click', async () => { await window.HB.signOut(); window.location.href = 'login.html'; });
-
-    init();
+    let allOrders=[], allQuotes=[], allTransport=[], map, markersLayer; const money=v=>window.HB.money(Number(v||0));
+    function showMessage(text,kind='info'){const box=document.getElementById('message');box.className=`hb-alert ${kind}`;box.textContent=text;box.style.display='block'}
+    function statusLabel(s){return({new:'Nuevo',contacted:'Contactado',quoted:'Cotizado',confirmed:'Confirmado',completed:'Completado',cancelled:'Cancelado'})[s]||s||'Nuevo'}
+    function statusClass(s){if(['confirmed','completed'].includes(s))return'verde';if(['contacted','quoted'].includes(s))return'amarillo';if(s==='cancelled')return'rojo';return'pending'}
+    function monthKey(date){return date?String(date).slice(0,7):'Sin fecha'} function parseCoords(text){const p=window.HB.parseMapsInput(text||'');return p&&p.latitude?{lat:p.latitude,lng:p.longitude}:null} function mapsLink(text){if(!text)return'';const url=String(text).match(/https?:\/\/[^\s]+/);return url?url[0]:''}
+    function filteredOrders(){const text=document.getElementById('searchOrders').value.toLowerCase().trim();const month=document.getElementById('monthFilter').value;const type=document.getElementById('typeFilter').value;const status=document.getElementById('statusFilter').value;return allOrders.filter(o=>{const blob=`${o.order_number||''} ${o.client_name||''} ${o.client_phone||''} ${o.event_type||''} ${o.event_address||''} ${o.notes||''}`.toLowerCase();return(!text||blob.includes(text))&&(!month||monthKey(o.event_date)===month)&&(!type||o.event_type===type)&&(!status||o.status===status)})}
+    function fillFilters(){const months=[...new Set(allOrders.map(o=>monthKey(o.event_date)).filter(x=>x!=='Sin fecha'))].sort().reverse();const types=[...new Set(allOrders.map(o=>o.event_type).filter(Boolean))].sort();const m=document.getElementById('monthFilter'),t=document.getElementById('typeFilter');const mv=m.value,tv=t.value;m.innerHTML='<option value="">Todos los meses</option>'+months.map(x=>`<option value="${x}">${x}</option>`).join('');t.innerHTML='<option value="">Todos los eventos</option>'+types.map(x=>`<option value="${window.HB.escapeAttr(x)}">${window.HB.escapeHtml(x)}</option>`).join('');m.value=mv;t.value=tv}
+    function bars(id,data){const max=Math.max(1,...data.map(d=>d.value));document.getElementById(id).innerHTML=data.length?data.map(d=>`<div class="hb-bar-row"><small>${window.HB.escapeHtml(d.label)}</small><div class="hb-bar-track"><div class="hb-bar-fill" style="width:${Math.max(4,d.value/max*100)}%"></div></div><strong>${d.value}</strong></div>`).join(''):'<p class="hb-muted">Sin datos.</p>'}
+    function renderAnalytics(){const orders=filteredOrders();const income=orders.reduce((s,o)=>s+Number(o.desired_budget||0),0);const quoteCost=allQuotes.reduce((s,q)=>s+Number(q.total_cost||0),0);const transport=allTransport.reduce((s,t)=>s+Number(t.suggested_cost||0),0);const costs=quoteCost||transport;document.getElementById('kpiIncome').textContent=money(income);document.getElementById('kpiCosts').textContent=money(costs);document.getElementById('kpiTransport').textContent=money(transport);document.getElementById('kpiProfit').textContent=money(income-costs);document.getElementById('kpiOrders').textContent=orders.length;document.getElementById('kpiConfirmed').textContent=orders.filter(o=>['confirmed','completed'].includes(o.status)).length;document.getElementById('kpiCancelled').textContent=orders.filter(o=>o.status==='cancelled').length;document.getElementById('kpiTicket').textContent=money(orders.length?income/orders.length:0);const byType={};orders.forEach(o=>byType[o.event_type||'Sin tipo']=(byType[o.event_type||'Sin tipo']||0)+1);bars('typeChart',Object.entries(byType).map(([label,value])=>({label,value})).sort((a,b)=>b.value-a.value));const byMonth={};orders.forEach(o=>byMonth[monthKey(o.event_date)]=(byMonth[monthKey(o.event_date)]||0)+1);bars('monthChart',Object.entries(byMonth).map(([label,value])=>({label,value})).sort((a,b)=>a.label.localeCompare(b.label)));renderOrders(orders);renderMap(orders)}
+    function renderMap(orders){if(!window.L)return;if(!map){const base=window.HB.baseLocation();map=L.map('eventsMap').setView([base.latitude,base.longitude],11);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap'}).addTo(map);markersLayer=L.layerGroup().addTo(map)}markersLayer.clearLayers();const pts=[];orders.forEach(o=>{const c=parseCoords(`${o.event_address||''}\n${o.notes||''}`);if(!c)return;pts.push([c.lat,c.lng]);L.marker([c.lat,c.lng]).addTo(markersLayer).bindPopup(`<strong>${window.HB.escapeHtml(o.event_type||'Evento')}</strong><br>${window.HB.escapeHtml(o.client_name||'Sin cliente')}<br>${window.HB.escapeHtml(o.event_date||'Sin fecha')}`)});if(pts.length)map.fitBounds(pts,{padding:[30,30]});setTimeout(()=>map.invalidateSize(),150)}
+    function orderRow(o){const link=mapsLink(o.event_address||o.notes||'');return`<div class="hb-order-row"><div><strong>${window.HB.escapeHtml(o.order_number||'Solicitud')}</strong><small>${window.HB.escapeHtml(o.client_name||'Sin cliente')} · ${window.HB.escapeHtml(o.client_phone||'Sin teléfono')}</small></div><div><strong>${window.HB.escapeHtml(o.event_type||'Evento')}</strong><small>${window.HB.escapeHtml(o.event_date||'Sin fecha')} ${o.desired_budget?'· '+money(o.desired_budget):''}</small></div><div><span class="hb-status ${statusClass(o.status)}">${statusLabel(o.status)}</span><small class="hb-order-location">${window.HB.escapeHtml(o.event_address||'Sin ubicación')}</small>${link?`<small><a class="hb-small-link" href="${window.HB.escapeAttr(link)}" target="_blank" rel="noopener">Abrir ubicación</a></small>`:''}</div><div class="hb-order-actions"><button class="hb-button secondary" data-edit-order="${o.id}" type="button">Editar</button><button class="hb-button hb-danger-button" data-delete-table="orders" data-delete-id="${o.id}" type="button">Borrar</button></div></div>`}
+    function renderOrders(orders){document.getElementById('ordersList').innerHTML=orders.length?orders.map(orderRow).join(''):'<div class="hb-alert warn">No hay solicitudes con esos filtros.</div>'}
+    async function loadData(){const client=window.HB.client();if(!client){document.getElementById('ordersList').innerHTML='<p class="hb-muted">Conecta Supabase para ver datos reales.</p>';return}const [ordersRes,quotesRes,transportRes]=await Promise.all([client.from('orders').select('id, order_number, client_name, client_phone, event_type, event_date, event_address, desired_budget, notes, status, created_at').order('created_at',{ascending:false}).limit(500),client.from('quotes').select('id, quote_number, total_cost, final_price, suggested_price, expected_profit, margin_percent, created_at').limit(500),client.from('transport_estimates').select('id, suggested_cost, distance_km_one_way, duration_minutes_one_way, created_at').limit(500)]);if(ordersRes.error)throw ordersRes.error;allOrders=ordersRes.data||[];allQuotes=quotesRes.data||[];allTransport=transportRes.data||[];fillFilters();renderAnalytics()}
+    function openEditModal(id){const o=allOrders.find(x=>x.id===id);if(!o)return;document.getElementById('editOrderId').value=o.id;document.getElementById('editOrderNumber').textContent=o.order_number||'Solicitud';document.getElementById('editClientName').value=o.client_name||'';document.getElementById('editClientPhone').value=o.client_phone||'';document.getElementById('editEventType').value=o.event_type||'';document.getElementById('editEventDate').value=o.event_date||'';document.getElementById('editDesiredBudget').value=o.desired_budget||'';document.getElementById('editStatus').value=o.status||'new';document.getElementById('editEventAddress').value=o.event_address||'';document.getElementById('editNotes').value=o.notes||'';document.getElementById('editModal').classList.add('open')}
+    function closeEditModal(){document.getElementById('editModal').classList.remove('open')}
+    async function saveOrderEdit(e){e.preventDefault();const client=window.HB.client();const id=document.getElementById('editOrderId').value;const payload={client_name:document.getElementById('editClientName').value.trim()||null,client_phone:document.getElementById('editClientPhone').value.trim()||null,event_type:document.getElementById('editEventType').value.trim()||null,event_date:document.getElementById('editEventDate').value||null,event_address:document.getElementById('editEventAddress').value.trim()||null,desired_budget:document.getElementById('editDesiredBudget').value?Number(document.getElementById('editDesiredBudget').value):null,status:document.getElementById('editStatus').value,notes:document.getElementById('editNotes').value.trim()||null};const {error}=await client.from('orders').update(payload).eq('id',id);if(error)throw error;closeEditModal();showMessage('Solicitud actualizada correctamente.','info');await loadData()}
+    async function deleteRecord(table,id){if(!confirm('¿Borrar este registro? Esta acción no se puede deshacer.'))return;const client=window.HB.client();const {error}=await client.from(table).delete().eq('id',id);if(error)throw error;showMessage('Registro borrado correctamente.','info');await loadData()}
+    function exportCsv(){const rows=filteredOrders();const header=['codigo','cliente','telefono','evento','fecha','estado','presupuesto','ubicacion','notas','creado'];const csv=[header.join(',')].concat(rows.map(o=>header.map(k=>`"${String(({codigo:o.order_number,cliente:o.client_name,telefono:o.client_phone,evento:o.event_type,fecha:o.event_date,estado:o.status,presupuesto:o.desired_budget,ubicacion:o.event_address,notas:o.notes,creado:o.created_at}[k]||'')).replaceAll('"','""')}"`).join(','))).join('\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`hello-balloons-analytics-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(a.href)}
+    document.addEventListener('click',async e=>{const edit=e.target.closest('[data-edit-order]');const del=e.target.closest('[data-delete-table]');try{if(edit)openEditModal(edit.dataset.editOrder);if(del)await deleteRecord(del.dataset.deleteTable,del.dataset.deleteId)}catch(err){showMessage(err.message||'No se pudo realizar la acción.','danger')}});
+    async function init(){if(!window.HB.isConfigured()){document.getElementById('loginRequired').style.display='none';document.getElementById('dashboardPanel').style.display='block';return}const session=await window.HB.getSession();if(!session){document.getElementById('loginRequired').style.display='block';document.getElementById('dashboardPanel').style.display='none';return}document.getElementById('loginRequired').style.display='none';document.getElementById('dashboardPanel').style.display='block';await loadData()}
+    ['searchOrders','monthFilter','typeFilter','statusFilter'].forEach(id=>document.getElementById(id).addEventListener('input',renderAnalytics));document.getElementById('refreshLists').addEventListener('click',loadData);document.getElementById('exportCsv').addEventListener('click',exportCsv);document.getElementById('closeModal').addEventListener('click',closeEditModal);document.getElementById('cancelEdit').addEventListener('click',closeEditModal);document.getElementById('editModal').addEventListener('click',e=>{if(e.target.id==='editModal')closeEditModal()});document.getElementById('editOrderForm').addEventListener('submit',async e=>{try{await saveOrderEdit(e)}catch(err){showMessage(err.message||'No se pudo guardar.','danger')}});document.getElementById('logoutButton').addEventListener('click',async()=>{await window.HB.signOut();window.location.href='login.html'});init();
   </script>
 </body>
 </html>
