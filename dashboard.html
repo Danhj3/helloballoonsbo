@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Hello Balloons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hb-app.css" />
+  <link rel="stylesheet" href="assets/css/hb-public.css" />
+</head>
+<body>
+  <nav class="hb-nav">
+    <div class="hb-nav-inner">
+      <a class="hb-brand" href="dashboard.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Dashboard</span></a>
+      <div class="hb-nav-links">
+        <a href="index.html">Web pública</a>
+        <a href="admin-galeria.html">Galería</a>
+        <a href="admin.html">Pedidos</a>
+        <a href="inventario-app.html">Inventario</a>
+        <a href="rutas.html">Rutas</a>
+        <a href="cotizador.html">Cotizador</a>
+        <a href="memoria-eventos.html">Memoria</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="hb-section">
+    <div class="hb-container">
+      <div id="loginRequired" class="hb-card pad" style="display:none">
+        <h2>Necesitas iniciar sesión</h2>
+        <p class="hb-muted">Este panel es interno.</p>
+        <a class="hb-button pink" href="login.html">Ir al login</a>
+      </div>
+
+      <div id="dashboardPanel" style="display:none">
+        <div class="hb-section-header">
+          <div>
+            <div class="hb-eyebrow">Panel interno</div>
+            <h2>Hola, Hello Balloons</h2>
+            <p class="hb-muted">Accesos rápidos para gestionar solicitudes, fotos, inventario, rutas y cotizaciones.</p>
+          </div>
+          <button id="logoutButton" class="hb-button secondary" type="button">Salir</button>
+        </div>
+
+        <div class="hb-grid-4" style="margin-bottom:24px">
+          <div class="hb-kpi"><span>Pedidos nuevos</span><strong id="newOrders">0</strong></div>
+          <div class="hb-kpi"><span>Fotos públicas</span><strong id="publicPhotos">0</strong></div>
+          <div class="hb-kpi"><span>Inventario</span><strong id="inventoryCount">0</strong></div>
+          <div class="hb-kpi"><span>Cotizaciones</span><strong id="quotesCount">0</strong></div>
+        </div>
+
+        <div class="hb-admin-grid">
+          <a class="hb-card pad hb-admin-card" href="admin.html"><h3>Pedidos recibidos</h3><p class="hb-muted">Revisar solicitudes de clientes y datos de contacto.</p></a>
+          <a class="hb-card pad hb-admin-card" href="admin-galeria.html"><h3>Galería pública</h3><p class="hb-muted">Subir fotos aprobadas para mostrar en la landing.</p></a>
+          <a class="hb-card pad hb-admin-card" href="inventario-app.html"><h3>Inventario</h3><p class="hb-muted">Actualizar muebles, colores, estado y ubicación.</p></a>
+          <a class="hb-card pad hb-admin-card" href="rutas.html"><h3>Rutas del día</h3><p class="hb-muted">Planificar paradas y horarios de montaje.</p></a>
+          <a class="hb-card pad hb-admin-card" href="cotizador.html"><h3>Cotizador interno</h3><p class="hb-muted">Calcular costos, transporte y precio mínimo rentable.</p></a>
+          <a class="hb-card pad hb-admin-card" href="memoria-eventos.html"><h3>Memoria de eventos</h3><p class="hb-muted">Registrar qué se llevó y aprendizajes de eventos.</p></a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/hb-core.js"></script>
+  <script>
+    async function countTable(table, queryFn) {
+      const client = window.HB.client();
+      if (!client) return 0;
+      let query = client.from(table).select('id', { count: 'exact', head: true });
+      if (queryFn) query = queryFn(query);
+      const { count } = await query;
+      return count || 0;
+    }
+
+    async function init() {
+      if (!window.HB.isConfigured()) {
+        document.getElementById('loginRequired').style.display = 'none';
+        document.getElementById('dashboardPanel').style.display = 'block';
+        return;
+      }
+      const session = await window.HB.getSession();
+      if (!session) {
+        document.getElementById('loginRequired').style.display = 'block';
+        document.getElementById('dashboardPanel').style.display = 'none';
+        return;
+      }
+      document.getElementById('loginRequired').style.display = 'none';
+      document.getElementById('dashboardPanel').style.display = 'block';
+      try {
+        document.getElementById('newOrders').textContent = await countTable('orders', q => q.eq('status', 'new'));
+        document.getElementById('publicPhotos').textContent = await countTable('event_memory_photos', q => q.eq('is_public', true));
+        document.getElementById('inventoryCount').textContent = await countTable('inventory_items');
+        document.getElementById('quotesCount').textContent = await countTable('quotes');
+      } catch (error) {}
+    }
+
+    document.getElementById('logoutButton').addEventListener('click', async () => {
+      await window.HB.signOut();
+      window.location.href = 'login.html';
+    });
+
+    init();
+  </script>
+</body>
+</html>
