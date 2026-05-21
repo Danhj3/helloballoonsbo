@@ -1,0 +1,71 @@
+/* Public-facing polish: keep landing client-oriented and hide internal language. */
+.hb-eyebrow {
+  background: transparent;
+  color: var(--hb-teal);
+  border: 1px solid rgba(12, 164, 148, .18);
+}
+
+.hb-logo-hero,
+.hb-brand img,
+.hb-logo-mark {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+.hb-logo-hero img {
+  width: 112px;
+  height: 112px;
+}
+
+.hb-footer-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 22px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.hb-socials {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hb-socials a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+  padding: 10px 13px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 800;
+}
+
+.hb-socials a:hover {
+  background: rgba(255,255,255,.10);
+}
+
+.hb-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.hb-admin-card {
+  text-decoration: none;
+  color: inherit;
+  min-height: 150px;
+}
+
+.hb-admin-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 45px rgba(38, 50, 56, .10);
+}
+
+@media (max-width: 900px) {
+  .hb-admin-grid { grid-template-columns: 1fr; }
+}
