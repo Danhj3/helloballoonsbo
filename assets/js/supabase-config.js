@@ -14,6 +14,7 @@ window.HELLO_BALLOONS_BASE_LOCATION = {
 (function () {
   const internalPages = [
     "dashboard.html",
+    "analytics.html",
     "admin-galeria.html",
     "inventario-app.html",
     "rutas.html",
@@ -22,7 +23,8 @@ window.HELLO_BALLOONS_BASE_LOCATION = {
   ];
 
   const items = [
-    { href: "dashboard.html", label: "Analytics" },
+    { href: "dashboard.html", label: "Inicio" },
+    { href: "analytics.html", label: "Analytics" },
     { href: "admin-galeria.html", label: "Galería" },
     { href: "inventario-app.html", label: "Inventario" },
     { href: "rutas.html", label: "Rutas" },
