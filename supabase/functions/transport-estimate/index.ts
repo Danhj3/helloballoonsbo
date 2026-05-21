@@ -10,12 +10,15 @@ type TransportRequest = {
     latitude: number;
     longitude: number;
   };
-  destination: {
+  destination?: {
     addressText?: string;
-    latitude: number;
-    longitude: number;
+    latitude?: number;
+    longitude?: number;
     zoneName?: string;
+    mapsUrl?: string;
   };
+  mapsUrl?: string;
+  addressText?: string;
   loadType?: LoadType;
   useGoogleRoutes?: boolean;
 };
@@ -45,6 +48,80 @@ function haversineKm(a: { latitude: number; longitude: number }, b: { latitude: 
 function roundToStep(value: number, step: number) {
   if (!step || step <= 0) return Math.round(value);
   return Math.ceil(value / step) * step;
+}
+
+function validCoordinate(latitude: number, longitude: number) {
+  return Number.isFinite(latitude) && Number.isFinite(longitude) && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180;
+}
+
+function parseCoordinates(value: string) {
+  const input = value.trim();
+  const decoded = (() => {
+    try { return decodeURIComponent(input); } catch { return input; }
+  })();
+
+  const patterns = [
+    /@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/,
+    /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/,
+    /[?&]q=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/,
+    /[?&]query=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/,
+    /(-?\d{1,2}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = decoded.match(pattern);
+    if (match) {
+      const latitude = Number(match[1]);
+      const longitude = Number(match[2]);
+      if (validCoordinate(latitude, longitude)) return { latitude, longitude };
+    }
+  }
+
+  return null;
+}
+
+async function resolveMapsUrl(mapsUrl: string) {
+  const local = parseCoordinates(mapsUrl);
+  if (local) return { ...local, resolvedUrl: mapsUrl, resolution: "parsed_original_url" };
+
+  const response = await fetch(mapsUrl, {
+    method: "GET",
+    redirect: "follow",
+    headers: {
+      "User-Agent": "HelloBalloonsBot/1.0",
+    },
+  });
+
+  const resolvedUrl = response.url || mapsUrl;
+  const parsedResolved = parseCoordinates(resolvedUrl);
+  if (parsedResolved) return { ...parsedResolved, resolvedUrl, resolution: "parsed_redirect_url" };
+
+  const html = await response.text();
+  const parsedHtml = parseCoordinates(html);
+  if (parsedHtml) return { ...parsedHtml, resolvedUrl, resolution: "parsed_html" };
+
+  throw new Error("No se pudieron extraer coordenadas del link de Google Maps. Abre el link, copia el enlace largo o pega coordenadas visibles.");
+}
+
+async function geocodeAddress(addressText: string) {
+  if (!GOOGLE_MAPS_API_KEY) return null;
+  const url = new URL("https://maps.googleapis.com/maps/api/geocode/json");
+  url.searchParams.set("address", addressText);
+  url.searchParams.set("key", GOOGLE_MAPS_API_KEY);
+  url.searchParams.set("language", "es");
+  url.searchParams.set("region", "bo");
+
+  const response = await fetch(url.toString());
+  if (!response.ok) throw new Error("No se pudo geocodificar la direccion.");
+  const payload = await response.json();
+  const location = payload.results?.[0]?.geometry?.location;
+  if (!location) return null;
+  return {
+    latitude: Number(location.lat),
+    longitude: Number(location.lng),
+    formattedAddress: payload.results?.[0]?.formatted_address,
+    providerPayload: payload,
+  };
 }
 
 async function getDefaultOrigin() {
@@ -145,8 +222,46 @@ Deno.serve(async (req) => {
     }
 
     const body = (await req.json()) as TransportRequest;
-    if (!body.destination?.latitude || !body.destination?.longitude) {
-      return errorResponse("El destino necesita latitud y longitud.", 422);
+    const mapsUrl = body.mapsUrl || body.destination?.mapsUrl || "";
+    const addressText = body.addressText || body.destination?.addressText || "";
+    let destination = {
+      latitude: Number(body.destination?.latitude),
+      longitude: Number(body.destination?.longitude),
+      addressText,
+      zoneName: body.destination?.zoneName,
+      mapsUrl,
+      resolution: "coordinates" as string,
+      providerPayload: null as unknown,
+    };
+
+    if (!validCoordinate(destination.latitude, destination.longitude)) {
+      if (mapsUrl) {
+        const resolved = await resolveMapsUrl(mapsUrl);
+        destination = {
+          ...destination,
+          latitude: resolved.latitude,
+          longitude: resolved.longitude,
+          mapsUrl: resolved.resolvedUrl,
+          resolution: resolved.resolution,
+        };
+      } else if (addressText) {
+        const geocoded = await geocodeAddress(addressText);
+        if (!geocoded) {
+          return errorResponse("Para calcular transporte pega un link de Google Maps o configura GOOGLE_MAPS_API_KEY para geocodificar direcciones.", 422);
+        }
+        destination = {
+          ...destination,
+          latitude: geocoded.latitude,
+          longitude: geocoded.longitude,
+          addressText: geocoded.formattedAddress || addressText,
+          resolution: "geocoded_address",
+          providerPayload: geocoded.providerPayload,
+        };
+      }
+    }
+
+    if (!validCoordinate(destination.latitude, destination.longitude)) {
+      return errorResponse("No se pudo obtener latitud y longitud del destino. Pega el link compartido de Google Maps o coordenadas.", 422);
     }
 
     const defaultOrigin = await getDefaultOrigin();
@@ -154,13 +269,13 @@ Deno.serve(async (req) => {
     const rates = await getDefaultRates();
     const loadType = body.loadType ?? "medium";
 
-    let distanceKmOneWay = haversineKm(origin, body.destination) * 1.25;
+    let distanceKmOneWay = haversineKm(origin, destination) * 1.25;
     let durationMinutesOneWay = distanceKmOneWay / 25 * 60;
-    let provider = "haversine_fallback";
-    let providerPayload: unknown = null;
+    let provider = destination.resolution === "coordinates" ? "haversine_fallback" : `haversine_fallback_${destination.resolution}`;
+    let providerPayload: unknown = destination.providerPayload;
 
     if (body.useGoogleRoutes !== false && GOOGLE_MAPS_API_KEY) {
-      const googleRoute = await getGoogleRoute(origin, body.destination);
+      const googleRoute = await getGoogleRoute(origin, destination);
       if (googleRoute) {
         distanceKmOneWay = googleRoute.distanceKmOneWay;
         durationMinutesOneWay = googleRoute.durationMinutesOneWay;
@@ -184,15 +299,16 @@ Deno.serve(async (req) => {
     const suggestedCost = roundToStep(rawCost, rates.roundingStep);
 
     let eventLocationId: string | null = null;
-    if (body.orderId && body.destination.addressText) {
+    if (body.orderId && (destination.addressText || destination.mapsUrl)) {
       const { data: location, error: locationError } = await supabase
         .from("event_locations")
         .insert({
           order_id: body.orderId,
-          address_text: body.destination.addressText,
-          latitude: body.destination.latitude,
-          longitude: body.destination.longitude,
-          zone_name: body.destination.zoneName ?? null,
+          address_text: destination.addressText || destination.mapsUrl || "Ubicacion compartida por Google Maps",
+          maps_url: destination.mapsUrl || null,
+          latitude: destination.latitude,
+          longitude: destination.longitude,
+          zone_name: destination.zoneName ?? null,
         })
         .select("id")
         .single();
@@ -223,6 +339,13 @@ Deno.serve(async (req) => {
 
     return jsonResponse({
       estimate,
+      destination: {
+        latitude: destination.latitude,
+        longitude: destination.longitude,
+        addressText: destination.addressText,
+        mapsUrl: destination.mapsUrl,
+        resolution: destination.resolution,
+      },
       calculation: {
         distanceKmOneWay: Number(distanceKmOneWay.toFixed(2)),
         roundTripKm: Number((distanceKmOneWay * 2).toFixed(2)),
