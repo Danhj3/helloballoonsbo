@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memoria de eventos | Hello Balloons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hb-app.css" />
+</head>
+<body>
+  <nav class="hb-nav">
+    <div class="hb-nav-inner">
+      <a class="hb-brand" href="index.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Hello Balloons</span></a>
+      <div class="hb-nav-links">
+        <a href="index.html">Inicio</a>
+        <a href="cotizador.html">Cotizador</a>
+        <a href="inventario-app.html">Inventario</a>
+        <a href="rutas.html">Rutas</a>
+        <a class="active" href="memoria-eventos.html">Memoria</a>
+        <a href="admin.html">Admin</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="hb-section">
+    <div class="hb-container">
+      <div class="hb-section-header">
+        <div>
+          <div class="hb-eyebrow">Aprendizaje operativo</div>
+          <h2>Memoria de eventos</h2>
+          <p class="hb-muted">Sube fotos de eventos realizados y registra qué se llevó, qué colores se usaron, costos reales y aprendizajes para próximas cotizaciones.</p>
+        </div>
+      </div>
+
+      <div id="authPanel" class="hb-card pad" style="margin-bottom:18px;display:none">
+        <h3>Ingreso interno</h3>
+        <form id="loginForm" class="hb-form">
+          <div class="hb-inline">
+            <div class="hb-field"><label>Email</label><input id="email" type="email" /></div>
+            <div class="hb-field"><label>Contraseña</label><input id="password" type="password" /></div>
+          </div>
+          <button class="hb-button primary" type="submit">Entrar</button>
+        </form>
+        <div id="loginMessage" class="hb-alert warn" style="display:none;margin-top:14px"></div>
+      </div>
+
+      <div id="appPanel" style="display:none">
+        <div class="hb-grid-2">
+          <section class="hb-card pad">
+            <h3>Registrar evento realizado</h3>
+            <form id="memoryForm" class="hb-form">
+              <div class="hb-inline">
+                <div class="hb-field">
+                  <label>Título del evento</label>
+                  <input id="title" placeholder="Bautizo sencillo beige y dorado" required />
+                </div>
+                <div class="hb-field">
+                  <label>Fecha</label>
+                  <input id="eventDate" type="date" />
+                </div>
+              </div>
+
+              <div class="hb-inline">
+                <div class="hb-field">
+                  <label>Tipo de evento</label>
+                  <select id="eventType">
+                    <option>Bautizo</option>
+                    <option>Cumpleaños</option>
+                    <option>Baby shower</option>
+                    <option>Revelación</option>
+                    <option>Graduación</option>
+                    <option>Corporativo</option>
+                    <option>Otro</option>
+                  </select>
+                </div>
+                <div class="hb-field">
+                  <label>Nivel</label>
+                  <select id="packageLevel">
+                    <option value="basic">Sencillo</option>
+                    <option value="medium">Medio</option>
+                    <option value="premium">Completo</option>
+                    <option value="custom">Personalizado</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="hb-inline">
+                <div class="hb-field"><label>Cliente</label><input id="clientName" placeholder="Opcional" /></div>
+                <div class="hb-field"><label>Tema</label><input id="theme" placeholder="Minnie, bautizo, Barbie..." /></div>
+              </div>
+
+              <div class="hb-field">
+                <label>Colores usados</label>
+                <input id="colors" placeholder="beige, dorado, blanco" />
+              </div>
+
+              <div class="hb-inline">
+                <div class="hb-field"><label>Precio cobrado</label><input id="finalPrice" type="number" min="0" step="1" /></div>
+                <div class="hb-field"><label>Costo real total</label><input id="realCost" type="number" min="0" step="1" /></div>
+              </div>
+
+              <div class="hb-field">
+                <label>Fotos del evento</label>
+                <input id="photos" type="file" accept="image/*" multiple />
+                <small class="hb-muted">Se suben al bucket privado `event-photos` cuando Supabase Storage esté configurado.</small>
+              </div>
+
+              <div class="hb-field">
+                <label>¿Qué se llevó?</label>
+                <textarea id="itemsText" placeholder="Ej: Panel circular blanco, mesa cilíndrica dorada, arco orgánico, globos beige y blanco, luces..."></textarea>
+              </div>
+
+              <div class="hb-field">
+                <label>¿Qué funcionó bien?</label>
+                <textarea id="whatWorked" placeholder="Ej: combinación de colores, montaje rápido, cliente satisfecho..."></textarea>
+              </div>
+
+              <div class="hb-field">
+                <label>¿Qué mejorar la próxima vez?</label>
+                <textarea id="whatImprove" placeholder="Ej: llevar más cinta, salir 30 minutos antes, repintar panel..."></textarea>
+              </div>
+
+              <div class="hb-field">
+                <label>Notas internas</label>
+                <textarea id="internalNotes" placeholder="Cualquier detalle que el sistema debería recordar."></textarea>
+              </div>
+
+              <button class="hb-button primary" type="submit">Guardar memoria</button>
+            </form>
+            <div id="formMessage" class="hb-alert info" style="display:none;margin-top:14px"></div>
+          </section>
+
+          <aside class="hb-card pad">
+            <h3>Para qué sirve</h3>
+            <div class="hb-alert info">
+              Esta memoria permite que la decoradora no dependa solo de recordar. El sistema podrá consultar eventos anteriores similares para sugerir costos, colores, muebles y advertencias.
+            </div>
+            <div class="hb-grid-2" style="margin-top:16px">
+              <div class="hb-kpi"><span>Memorias</span><strong id="memoryCount">0</strong></div>
+              <div class="hb-kpi"><span>Fotos</span><strong id="photoCount">0</strong></div>
+            </div>
+            <div class="hb-alert warn" style="margin-top:18px">
+              La IA debe usar esto como contexto, no como verdad absoluta. La verdad operativa sigue siendo: inventario actualizado, reservas y costos reales.
+            </div>
+          </aside>
+        </div>
+
+        <section class="hb-section">
+          <div class="hb-section-header">
+            <div><h2>Eventos guardados</h2><p class="hb-muted">Últimos registros de memoria operativa.</p></div>
+          </div>
+          <div id="memoriesGrid" class="hb-grid-3"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/hb-core.js"></script>
+  <script>
+    let memories = [];
+    let photoTotal = 0;
+
+    function showMessage(id, text, kind = 'info') {
+      const box = document.getElementById(id);
+      box.className = `hb-alert ${kind}`;
+      box.textContent = text;
+      box.style.display = 'block';
+    }
+
+    function colorsArray(value) {
+      return String(value || '')
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean);
+    }
+
+    function parseItems(value) {
+      return String(value || '')
+        .split(/\n|;/)
+        .map(item => item.trim())
+        .filter(Boolean);
+    }
+
+    async function uploadPhotos(memoryId, files) {
+      const client = window.HB.client();
+      if (!client || !files || !files.length) return 0;
+      let uploaded = 0;
+
+      for (const file of files) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, '-');
+        const path = `${memoryId}/${Date.now()}-${safeName}`;
+        const { error: uploadError } = await client.storage.from('event-photos').upload(path, file, { upsert: false });
+        if (uploadError) throw uploadError;
+
+        const { error: photoError } = await client.from('event_memory_photos').insert({
+          event_memory_id: memoryId,
+          storage_bucket: 'event-photos',
+          storage_path: path,
+          original_filename: file.name,
+          mime_type: file.type,
+          file_size_bytes: file.size,
+          is_cover: uploaded === 0
+        });
+        if (photoError) throw photoError;
+        uploaded++;
+      }
+
+      return uploaded;
+    }
+
+    async function loadMemories() {
+      const client = window.HB.client();
+      if (!client) {
+        memories = [
+          { title: 'Bautizo sencillo', event_type: 'Bautizo', event_date: '2026-05-20', color_palette: ['beige','blanco','dorado'], package_level: 'basic', what_worked: 'Decoración limpia y rápida de montar.' }
+        ];
+        photoTotal = 0;
+        renderMemories();
+        return;
+      }
+
+      const { data, error } = await client
+        .from('event_memories')
+        .select('id, title, event_type, event_date, theme, color_palette, package_level, final_price, real_total_cost, real_margin_percent, what_worked, what_to_improve, created_at')
+        .order('created_at', { ascending: false })
+        .limit(12);
+      if (error) throw error;
+      memories = data || [];
+
+      const { count } = await client
+        .from('event_memory_photos')
+        .select('id', { count: 'exact', head: true });
+      photoTotal = count || 0;
+      renderMemories();
+    }
+
+    function renderMemories() {
+      document.getElementById('memoryCount').textContent = memories.length;
+      document.getElementById('photoCount').textContent = photoTotal;
+      const grid = document.getElementById('memoriesGrid');
+      if (!memories.length) {
+        grid.innerHTML = '<div class="hb-alert warn">Todavía no hay eventos guardados.</div>';
+        return;
+      }
+      grid.innerHTML = memories.map(memory => `
+        <article class="hb-card pad">
+          <h3>${window.HB.escapeHtml(memory.title)}</h3>
+          <p class="hb-muted">${window.HB.escapeHtml(memory.event_type || '')} ${memory.event_date ? '· ' + window.HB.escapeHtml(memory.event_date) : ''}</p>
+          <p><strong>Colores:</strong> ${(memory.color_palette || []).map(window.HB.escapeHtml).join(', ') || '-'}</p>
+          <p><strong>Nivel:</strong> ${window.HB.escapeHtml(memory.package_level || '-')}</p>
+          ${memory.final_price ? `<p><strong>Precio:</strong> ${window.HB.money(memory.final_price)}</p>` : ''}
+          ${memory.real_margin_percent ? `<p><strong>Margen real:</strong> ${Math.round(Number(memory.real_margin_percent) * 100)}%</p>` : ''}
+          <p class="hb-muted">${window.HB.escapeHtml(memory.what_worked || memory.what_to_improve || 'Sin notas todavía.')}</p>
+        </article>
+      `).join('');
+    }
+
+    async function init() {
+      if (!window.HB.isConfigured()) {
+        document.getElementById('authPanel').style.display = 'none';
+        document.getElementById('appPanel').style.display = 'block';
+        await loadMemories();
+        return;
+      }
+
+      const session = await window.HB.getSession();
+      if (!session) {
+        document.getElementById('authPanel').style.display = 'block';
+        document.getElementById('appPanel').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('authPanel').style.display = 'none';
+      document.getElementById('appPanel').style.display = 'block';
+      await loadMemories();
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      try {
+        await window.HB.signIn(document.getElementById('email').value.trim(), document.getElementById('password').value);
+        await init();
+      } catch (error) {
+        showMessage('loginMessage', error.message || 'No se pudo iniciar sesión.', 'danger');
+      }
+    });
+
+    document.getElementById('memoryForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const client = window.HB.client();
+      const payload = {
+        title: document.getElementById('title').value.trim(),
+        event_type: document.getElementById('eventType').value,
+        event_date: document.getElementById('eventDate').value || null,
+        client_name: document.getElementById('clientName').value.trim() || null,
+        theme: document.getElementById('theme').value.trim() || null,
+        color_palette: colorsArray(document.getElementById('colors').value),
+        package_level: document.getElementById('packageLevel').value,
+        final_price: Number(document.getElementById('finalPrice').value || 0) || null,
+        real_total_cost: Number(document.getElementById('realCost').value || 0) || null,
+        what_worked: document.getElementById('whatWorked').value.trim() || null,
+        what_to_improve: document.getElementById('whatImprove').value.trim() || null,
+        internal_notes: document.getElementById('internalNotes').value.trim() || null
+      };
+
+      if (!payload.title) {
+        showMessage('formMessage', 'El título del evento es obligatorio.', 'danger');
+        return;
+      }
+
+      if (!client) {
+        memories.unshift(payload);
+        renderMemories();
+        showMessage('formMessage', 'Guardado en modo prototipo local. Configura Supabase para guardar real.', 'warn');
+        event.target.reset();
+        return;
+      }
+
+      try {
+        const { data: memory, error } = await client
+          .from('event_memories')
+          .insert(payload)
+          .select('id')
+          .single();
+        if (error) throw error;
+
+        const itemNames = parseItems(document.getElementById('itemsText').value);
+        if (itemNames.length) {
+          const rows = itemNames.map(item => ({
+            event_memory_id: memory.id,
+            item_name: item,
+            item_type: 'otro',
+            source: 'owned',
+            quantity: 1,
+            notes: 'Registrado desde texto libre'
+          }));
+          const { error: itemError } = await client.from('event_memory_items').insert(rows);
+          if (itemError) throw itemError;
+        }
+
+        const files = document.getElementById('photos').files;
+        const uploaded = await uploadPhotos(memory.id, files);
+        await loadMemories();
+        showMessage('formMessage', `Memoria guardada${uploaded ? ` con ${uploaded} foto(s)` : ''}.`, 'info');
+        event.target.reset();
+      } catch (error) {
+        showMessage('formMessage', error.message || 'No se pudo guardar la memoria.', 'danger');
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
