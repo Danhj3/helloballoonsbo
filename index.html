@@ -20,8 +20,7 @@
         <div class="hb-nav-links">
           <a class="active" href="index.html">Inicio</a>
           <a href="cuentanos-tu-evento.html">Cotizar</a>
-          <a href="cotizador.html">Interno</a>
-          <a href="admin.html">Admin</a>
+          <a href="#galeria">Galería</a>
         </div>
       </div>
     </nav>
@@ -36,7 +35,7 @@
         <p class="hb-lead">No necesitas tener todo decidido. Te guiamos de forma sencilla para ordenar tu idea, elegir el tipo de decoración y enviarnos una solicitud clara.</p>
         <div class="hb-actions">
           <a class="hb-button pink" href="cuentanos-tu-evento.html">Empezar cotización</a>
-          <a class="hb-button secondary" href="#como-funciona">Ver cómo funciona</a>
+          <a class="hb-button secondary" href="#galeria">Ver trabajos</a>
         </div>
       </div>
     </header>
@@ -51,23 +50,25 @@
             </div>
           </div>
           <div class="hb-grid-4">
-            <article class="hb-card pad">
-              <h3>1. Tipo de evento</h3>
-              <p class="hb-muted">Bautizo, cumpleaños, baby shower, revelación, graduación u otro.</p>
-            </article>
-            <article class="hb-card pad">
-              <h3>2. Estilo</h3>
-              <p class="hb-muted">Sencillo, medio o completo. Sin presión ni términos complicados.</p>
-            </article>
-            <article class="hb-card pad">
-              <h3>3. Colores y lugar</h3>
-              <p class="hb-muted">Puedes pegar el link de Google Maps o escribir la zona.</p>
-            </article>
-            <article class="hb-card pad">
-              <h3>4. Revisar y enviar</h3>
-              <p class="hb-muted">Ves el resumen antes de mandarlo y respondemos por WhatsApp.</p>
-            </article>
+            <article class="hb-card pad"><h3>1. Tipo de evento</h3><p class="hb-muted">Bautizo, cumpleaños, baby shower, revelación, graduación u otro.</p></article>
+            <article class="hb-card pad"><h3>2. Estilo</h3><p class="hb-muted">Sencillo, medio o completo. Sin presión ni términos complicados.</p></article>
+            <article class="hb-card pad"><h3>3. Colores y lugar</h3><p class="hb-muted">Puedes pegar el link de Google Maps o escribir la zona.</p></article>
+            <article class="hb-card pad"><h3>4. Revisar y enviar</h3><p class="hb-muted">Ves el resumen antes de mandarlo y respondemos por WhatsApp.</p></article>
           </div>
+        </div>
+      </section>
+
+      <section id="galeria" class="hb-section">
+        <div class="hb-container">
+          <div class="hb-section-header">
+            <div>
+              <h2>Trabajos realizados</h2>
+              <p class="hb-muted">Algunas decoraciones preparadas por Hello Balloons.</p>
+            </div>
+            <a class="hb-button secondary" href="cuentanos-tu-evento.html">Quiero cotizar</a>
+          </div>
+          <div id="galleryGrid" class="hb-grid-3"></div>
+          <div id="galleryNotice" class="hb-alert warn" style="display:none;margin-top:18px"></div>
         </div>
       </section>
 
@@ -97,9 +98,67 @@
   <script src="assets/js/supabase-config.js"></script>
   <script src="assets/js/hb-core.js"></script>
   <script>
+    async function loadPublicGallery() {
+      const grid = document.getElementById('galleryGrid');
+      const notice = document.getElementById('galleryNotice');
+      const fallback = [
+        { title: 'Decoración para bautizo', type: 'Bautizo', image: window.HB.brand.logoUrl },
+        { title: 'Mesa principal personalizada', type: 'Cumpleaños', image: window.HB.brand.logoUrl },
+        { title: 'Globos y fondo temático', type: 'Celebración', image: window.HB.brand.logoUrl }
+      ];
+
+      if (!window.HB.isConfigured()) {
+        grid.innerHTML = fallback.map(item => galleryCard(item.title, item.type, item.image)).join('');
+        notice.textContent = 'Cuando subas fotos desde el administrador, aquí aparecerán los trabajos reales.';
+        notice.style.display = 'block';
+        return;
+      }
+
+      try {
+        const client = window.HB.client();
+        const { data, error } = await client
+          .from('event_memories')
+          .select('id, public_title, title, event_type, event_memory_photos(storage_bucket, storage_path, is_public, display_order)')
+          .eq('is_public', true)
+          .order('created_at', { ascending: false })
+          .limit(9);
+        if (error) throw error;
+
+        const cards = (data || []).map(item => {
+          const photos = (item.event_memory_photos || []).filter(photo => photo.is_public);
+          const photo = photos.sort((a, b) => Number(a.display_order || 0) - Number(b.display_order || 0))[0];
+          const image = photo ? client.storage.from(photo.storage_bucket).getPublicUrl(photo.storage_path).data.publicUrl : window.HB.brand.logoUrl;
+          return galleryCard(item.public_title || item.title, item.event_type || 'Evento', image);
+        });
+
+        grid.innerHTML = cards.length ? cards.join('') : fallback.map(item => galleryCard(item.title, item.type, item.image)).join('');
+        if (!cards.length) {
+          notice.textContent = 'Todavía no hay fotos públicas cargadas.';
+          notice.style.display = 'block';
+        }
+      } catch (error) {
+        grid.innerHTML = fallback.map(item => galleryCard(item.title, item.type, item.image)).join('');
+        notice.textContent = 'No se pudo cargar la galería pública todavía.';
+        notice.style.display = 'block';
+      }
+    }
+
+    function galleryCard(title, type, image) {
+      return `
+        <article class="hb-card">
+          <img class="hb-card-img" src="${window.HB.escapeAttr(image)}" alt="${window.HB.escapeAttr(title)}" />
+          <div class="hb-card-body">
+            <h3>${window.HB.escapeHtml(title)}</h3>
+            <p class="hb-muted">${window.HB.escapeHtml(type)}</p>
+          </div>
+        </article>
+      `;
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       const grid = document.getElementById('servicesGrid');
       const notice = document.getElementById('setupNotice');
+      await loadPublicGallery();
       const services = await window.HB.fetchServices();
       grid.innerHTML = services.slice(0, 3).map(service => `
         <article class="hb-card pad">
