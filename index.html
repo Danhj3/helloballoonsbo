@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello Balloons | Cuéntanos tu evento</title>
+  <title>Hello Balloons | Decoración para eventos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/hb-app.css" />
+  <link rel="stylesheet" href="assets/css/hb-public.css" />
 </head>
 <body>
   <div class="hb-shell">
@@ -21,6 +22,7 @@
           <a class="active" href="index.html">Inicio</a>
           <a href="cuentanos-tu-evento.html">Cotizar</a>
           <a href="#galeria">Galería</a>
+          <a href="#contacto">Contacto</a>
         </div>
       </div>
     </nav>
@@ -30,40 +32,22 @@
         <div class="hb-logo-hero">
           <img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" />
         </div>
-        <div class="hb-eyebrow">Decoración de escenarios para eventos</div>
-        <h1 class="hb-title">Cuéntanos tu evento, <span>paso a paso.</span></h1>
-        <p class="hb-lead">No necesitas tener todo decidido. Te guiamos de forma sencilla para ordenar tu idea, elegir el tipo de decoración y enviarnos una solicitud clara.</p>
+        <h1 class="hb-title">Decoramos momentos <span>especiales.</span></h1>
+        <p class="hb-lead">Cuéntanos qué evento tienes en mente, comparte tus colores o fotos de referencia y prepararemos una propuesta para ti.</p>
         <div class="hb-actions">
-          <a class="hb-button pink" href="cuentanos-tu-evento.html">Empezar cotización</a>
+          <a class="hb-button pink" href="cuentanos-tu-evento.html">Solicitar cotización</a>
           <a class="hb-button secondary" href="#galeria">Ver trabajos</a>
         </div>
       </div>
     </header>
 
     <main>
-      <section id="como-funciona" class="hb-section">
-        <div class="hb-container">
-          <div class="hb-section-header">
-            <div>
-              <h2>Una experiencia tranquila</h2>
-              <p class="hb-muted">Como pedir un servicio por app: eliges poco a poco, revisas y envías.</p>
-            </div>
-          </div>
-          <div class="hb-grid-4">
-            <article class="hb-card pad"><h3>1. Tipo de evento</h3><p class="hb-muted">Bautizo, cumpleaños, baby shower, revelación, graduación u otro.</p></article>
-            <article class="hb-card pad"><h3>2. Estilo</h3><p class="hb-muted">Sencillo, medio o completo. Sin presión ni términos complicados.</p></article>
-            <article class="hb-card pad"><h3>3. Colores y lugar</h3><p class="hb-muted">Puedes pegar el link de Google Maps o escribir la zona.</p></article>
-            <article class="hb-card pad"><h3>4. Revisar y enviar</h3><p class="hb-muted">Ves el resumen antes de mandarlo y respondemos por WhatsApp.</p></article>
-          </div>
-        </div>
-      </section>
-
       <section id="galeria" class="hb-section">
         <div class="hb-container">
           <div class="hb-section-header">
             <div>
               <h2>Trabajos realizados</h2>
-              <p class="hb-muted">Algunas decoraciones preparadas por Hello Balloons.</p>
+              <p class="hb-muted">Ideas, colores y montajes preparados por Hello Balloons.</p>
             </div>
             <a class="hb-button secondary" href="cuentanos-tu-evento.html">Quiero cotizar</a>
           </div>
@@ -71,25 +55,21 @@
           <div id="galleryNotice" class="hb-alert warn" style="display:none;margin-top:18px"></div>
         </div>
       </section>
-
-      <section class="hb-section">
-        <div class="hb-container">
-          <div class="hb-section-header">
-            <div>
-              <h2>Ideas frecuentes</h2>
-              <p class="hb-muted">Puedes empezar desde una idea simple. Después ordenamos los detalles.</p>
-            </div>
-          </div>
-          <div id="servicesGrid" class="hb-grid-3"></div>
-          <div id="setupNotice" class="hb-alert warn" style="display:none;margin-top:18px"></div>
-        </div>
-      </section>
     </main>
 
-    <footer class="hb-footer">
-      <div class="hb-container">
-        <strong>Hello Balloons</strong>
-        <p class="hb-muted" style="color:rgba(255,255,255,.72)">Decoración de escenarios para eventos — Santa Cruz de la Sierra.</p>
+    <footer id="contacto" class="hb-footer">
+      <div class="hb-container hb-footer-grid">
+        <div>
+          <strong>Hello Balloons</strong>
+          <p class="hb-muted" style="color:rgba(255,255,255,.72)">Decoración de escenarios para eventos — Santa Cruz de la Sierra.</p>
+          <p style="margin:8px 0 0"><strong>WhatsApp:</strong> <a href="https://wa.me/59175346838" style="color:#fff;text-decoration:none">75346838</a></p>
+        </div>
+        <div class="hb-socials">
+          <a href="https://www.instagram.com/helloballoonsbo" target="_blank" rel="noopener">◎ Instagram</a>
+          <a href="https://www.facebook.com/helloballoonsbo" target="_blank" rel="noopener">f Facebook</a>
+          <a href="https://www.tiktok.com/@helloballoonsbo" target="_blank" rel="noopener">♪ TikTok</a>
+          <a href="index.html">🌐 Web</a>
+        </div>
       </div>
     </footer>
   </div>
@@ -109,8 +89,6 @@
 
       if (!window.HB.isConfigured()) {
         grid.innerHTML = fallback.map(item => galleryCard(item.title, item.type, item.image)).join('');
-        notice.textContent = 'Cuando subas fotos desde el administrador, aquí aparecerán los trabajos reales.';
-        notice.style.display = 'block';
         return;
       }
 
@@ -133,13 +111,11 @@
 
         grid.innerHTML = cards.length ? cards.join('') : fallback.map(item => galleryCard(item.title, item.type, item.image)).join('');
         if (!cards.length) {
-          notice.textContent = 'Todavía no hay fotos públicas cargadas.';
+          notice.textContent = 'Pronto compartiremos más trabajos realizados.';
           notice.style.display = 'block';
         }
       } catch (error) {
         grid.innerHTML = fallback.map(item => galleryCard(item.title, item.type, item.image)).join('');
-        notice.textContent = 'No se pudo cargar la galería pública todavía.';
-        notice.style.display = 'block';
       }
     }
 
@@ -155,27 +131,7 @@
       `;
     }
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const grid = document.getElementById('servicesGrid');
-      const notice = document.getElementById('setupNotice');
-      await loadPublicGallery();
-      const services = await window.HB.fetchServices();
-      grid.innerHTML = services.slice(0, 3).map(service => `
-        <article class="hb-card pad">
-          <h3>${window.HB.escapeHtml(service.name)}</h3>
-          <p class="hb-muted">${window.HB.escapeHtml(service.description || 'Servicio personalizado para tu evento.')}</p>
-          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:16px">
-            <span class="hb-price">Desde ${window.HB.money(service.base_price, service.currency)}</span>
-            <a class="hb-button secondary" href="cuentanos-tu-evento.html">Elegir</a>
-          </div>
-        </article>
-      `).join('');
-
-      if (!window.HB.isConfigured()) {
-        notice.textContent = 'La web está en modo prototipo si Supabase todavía no tiene todas las tablas ejecutadas.';
-        notice.style.display = 'block';
-      }
-    });
+    document.addEventListener('DOMContentLoaded', loadPublicGallery);
   </script>
 </body>
 </html>
