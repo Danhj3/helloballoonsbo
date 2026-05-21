@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ingreso interno | Hello Balloons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hb-app.css" />
+  <link rel="stylesheet" href="assets/css/hb-public.css" />
+</head>
+<body>
+  <main class="hb-section">
+    <div class="hb-container" style="max-width:520px">
+      <div class="hb-card pad">
+        <div style="text-align:center;margin-bottom:22px">
+          <img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" style="width:96px;height:96px;object-fit:contain" />
+          <h1 style="margin:10px 0 0;font-size:2rem;letter-spacing:-.05em">Ingreso interno</h1>
+          <p class="hb-muted">Panel de administración de Hello Balloons.</p>
+        </div>
+        <form id="loginForm" class="hb-form">
+          <div class="hb-field">
+            <label>Email</label>
+            <input id="email" type="email" required autocomplete="email" />
+          </div>
+          <div class="hb-field">
+            <label>Contraseña</label>
+            <input id="password" type="password" required autocomplete="current-password" />
+          </div>
+          <button class="hb-button pink" type="submit">Entrar al dashboard</button>
+        </form>
+        <div id="message" class="hb-alert danger" style="display:none;margin-top:14px"></div>
+        <div style="margin-top:20px;text-align:center">
+          <a class="hb-small-link" href="index.html">Volver a la web pública</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/hb-core.js"></script>
+  <script>
+    const msg = document.getElementById('message');
+    document.getElementById('loginForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      try {
+        await window.HB.signIn(document.getElementById('email').value.trim(), document.getElementById('password').value);
+        window.location.href = 'dashboard.html';
+      } catch (error) {
+        msg.textContent = error.message || 'No se pudo iniciar sesión.';
+        msg.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
