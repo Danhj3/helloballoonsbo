@@ -94,6 +94,40 @@
     return 2 * radiusKm * Math.asin(Math.sqrt(x));
   };
 
+  HB.parseMapsInput = function parseMapsInput(value) {
+    const input = String(value || "").trim();
+    if (!input) return null;
+
+    const decoded = (() => {
+      try { return decodeURIComponent(input); } catch { return input; }
+    })();
+
+    const patterns = [
+      /@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/,
+      /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/,
+      /[?&]q=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/,
+      /[?&]query=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/,
+      /(-?\d{1,2}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/
+    ];
+
+    for (const pattern of patterns) {
+      const match = decoded.match(pattern);
+      if (match) {
+        const latitude = Number(match[1]);
+        const longitude = Number(match[2]);
+        if (Number.isFinite(latitude) && Number.isFinite(longitude) && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180) {
+          return { latitude, longitude, source: "parsed_locally", originalInput: input };
+        }
+      }
+    }
+
+    if (/maps\.app\.goo\.gl|goo\.gl\/maps|google\.com\/maps/i.test(input)) {
+      return { needsServerResolve: true, mapsUrl: input, source: "needs_server_resolve", originalInput: input };
+    }
+
+    return { addressText: input, source: "address_text", originalInput: input };
+  };
+
   HB.transportFallback = function transportFallback({ destination, loadType = "medium" }) {
     const origin = HB.baseLocation();
     const oneWayKm = HB.haversineKm(origin, destination) * 1.25;
