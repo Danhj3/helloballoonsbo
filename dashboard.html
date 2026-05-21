@@ -9,19 +9,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/hb-app.css" />
   <link rel="stylesheet" href="assets/css/hb-public.css" />
+  <style>
+    .hb-danger-button{background:#fff;color:#a1284b;border:1px solid rgba(226,85,123,.28);box-shadow:none}.hb-danger-button:hover{background:#fff6f8}.hb-record-list{display:grid;gap:10px}.hb-record{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid var(--hb-line);border-radius:18px;padding:14px;background:#fff}.hb-record strong{display:block}.hb-record small{color:var(--hb-muted)}.hb-record-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}@media(max-width:720px){.hb-record{align-items:flex-start;flex-direction:column}.hb-record-actions{width:100%;justify-content:flex-start}}
+  </style>
 </head>
 <body>
   <nav class="hb-nav">
     <div class="hb-nav-inner">
       <a class="hb-brand" href="dashboard.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Dashboard</span></a>
       <div class="hb-nav-links">
-        <a href="index.html">Web pública</a>
-        <a href="admin-galeria.html">Galería</a>
+        <a class="active" href="dashboard.html">Inicio</a>
         <a href="admin.html">Pedidos</a>
+        <a href="admin-galeria.html">Galería</a>
         <a href="inventario-app.html">Inventario</a>
         <a href="rutas.html">Rutas</a>
         <a href="cotizador.html">Cotizador</a>
         <a href="memoria-eventos.html">Memoria</a>
+        <a href="index.html">Web pública</a>
       </div>
     </div>
   </nav>
@@ -38,8 +42,8 @@
         <div class="hb-section-header">
           <div>
             <div class="hb-eyebrow">Panel interno</div>
-            <h2>Hola, Hello Balloons</h2>
-            <p class="hb-muted">Accesos rápidos para gestionar solicitudes, fotos, inventario, rutas y cotizaciones.</p>
+            <h2>Dashboard Hello Balloons</h2>
+            <p class="hb-muted">Gestiona pedidos, galería, inventario, rutas, cotizaciones y memoria desde un solo lugar.</p>
           </div>
           <button id="logoutButton" class="hb-button secondary" type="button">Salir</button>
         </div>
@@ -59,6 +63,35 @@
           <a class="hb-card pad hb-admin-card" href="cotizador.html"><h3>Cotizador interno</h3><p class="hb-muted">Calcular costos, transporte y precio mínimo rentable.</p></a>
           <a class="hb-card pad hb-admin-card" href="memoria-eventos.html"><h3>Memoria de eventos</h3><p class="hb-muted">Registrar qué se llevó y aprendizajes de eventos.</p></a>
         </div>
+
+        <section class="hb-section">
+          <div class="hb-section-header">
+            <div>
+              <h2>Limpiar datos de prueba</h2>
+              <p class="hb-muted">Borra registros individuales que fueron cargados por error o para probar. No se borra todo en masa.</p>
+            </div>
+            <button id="refreshLists" class="hb-button secondary" type="button">Actualizar listas</button>
+          </div>
+          <div id="deleteMessage" class="hb-alert info" style="display:none;margin-bottom:18px"></div>
+          <div class="hb-grid-2">
+            <article class="hb-card pad">
+              <h3>Últimos pedidos</h3>
+              <div id="ordersList" class="hb-record-list"><p class="hb-muted">Cargando...</p></div>
+            </article>
+            <article class="hb-card pad">
+              <h3>Eventos de galería / memoria</h3>
+              <div id="memoriesList" class="hb-record-list"><p class="hb-muted">Cargando...</p></div>
+            </article>
+            <article class="hb-card pad">
+              <h3>Inventario reciente</h3>
+              <div id="inventoryList" class="hb-record-list"><p class="hb-muted">Cargando...</p></div>
+            </article>
+            <article class="hb-card pad">
+              <h3>Cotizaciones recientes</h3>
+              <div id="quotesList" class="hb-record-list"><p class="hb-muted">Cargando...</p></div>
+            </article>
+          </div>
+        </section>
       </div>
     </div>
   </main>
@@ -76,10 +109,85 @@
       return count || 0;
     }
 
+    function showDeleteMessage(text, kind = 'info') {
+      const box = document.getElementById('deleteMessage');
+      box.className = `hb-alert ${kind}`;
+      box.textContent = text;
+      box.style.display = 'block';
+    }
+
+    function recordHtml({ title, subtitle, table, id, openHref }) {
+      return `
+        <div class="hb-record">
+          <div><strong>${window.HB.escapeHtml(title || 'Sin título')}</strong><small>${window.HB.escapeHtml(subtitle || '')}</small></div>
+          <div class="hb-record-actions">
+            ${openHref ? `<a class="hb-button secondary" href="${openHref}">Abrir</a>` : ''}
+            <button class="hb-button hb-danger-button" type="button" data-delete-table="${table}" data-delete-id="${id}">Borrar</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadDashboardCounts() {
+      try {
+        document.getElementById('newOrders').textContent = await countTable('orders', q => q.eq('status', 'new'));
+        document.getElementById('publicPhotos').textContent = await countTable('event_memory_photos', q => q.eq('is_public', true));
+        document.getElementById('inventoryCount').textContent = await countTable('inventory_items');
+        document.getElementById('quotesCount').textContent = await countTable('quotes');
+      } catch (error) {}
+    }
+
+    async function loadCleanupLists() {
+      const client = window.HB.client();
+      if (!client) {
+        ['ordersList','memoriesList','inventoryList','quotesList'].forEach(id => document.getElementById(id).innerHTML = '<p class="hb-muted">Conecta Supabase para ver registros reales.</p>');
+        return;
+      }
+
+      try {
+        const [{ data: orders }, { data: memories }, { data: inventory }, { data: quotes }] = await Promise.all([
+          client.from('orders').select('id, order_number, client_name, event_type, event_date, status, created_at').order('created_at', { ascending:false }).limit(8),
+          client.from('event_memories').select('id, title, public_title, event_type, event_date, is_public, created_at').order('created_at', { ascending:false }).limit(8),
+          client.from('inventory_items').select('id, code, name, current_status, current_color, updated_at').order('updated_at', { ascending:false }).limit(8),
+          client.from('quotes').select('id, quote_number, status, final_price, suggested_price, created_at').order('created_at', { ascending:false }).limit(8)
+        ]);
+
+        document.getElementById('ordersList').innerHTML = (orders || []).length ? orders.map(o => recordHtml({ title: `${o.order_number || 'Pedido'} · ${o.client_name || 'Sin cliente'}`, subtitle: `${o.event_type || 'Evento'} · ${o.event_date || 'Sin fecha'} · ${o.status || ''}`, table:'orders', id:o.id, openHref:'admin.html' })).join('') : '<p class="hb-muted">No hay pedidos.</p>';
+        document.getElementById('memoriesList').innerHTML = (memories || []).length ? memories.map(m => recordHtml({ title: m.public_title || m.title, subtitle: `${m.event_type || 'Evento'} · ${m.is_public ? 'Público' : 'Privado'}`, table:'event_memories', id:m.id, openHref:'admin-galeria.html' })).join('') : '<p class="hb-muted">No hay eventos guardados.</p>';
+        document.getElementById('inventoryList').innerHTML = (inventory || []).length ? inventory.map(i => recordHtml({ title: `${i.code || ''} ${i.name || 'Ítem'}`, subtitle: `${i.current_status || ''} · ${i.current_color || 'Sin color'}`, table:'inventory_items', id:i.id, openHref:'inventario-app.html' })).join('') : '<p class="hb-muted">No hay inventario.</p>';
+        document.getElementById('quotesList').innerHTML = (quotes || []).length ? quotes.map(q => recordHtml({ title: q.quote_number || 'Cotización', subtitle: `${q.status || ''} · ${q.final_price || q.suggested_price || 0} Bs.`, table:'quotes', id:q.id, openHref:'cotizador.html' })).join('') : '<p class="hb-muted">No hay cotizaciones.</p>';
+      } catch (error) {
+        showDeleteMessage(error.message || 'No se pudieron cargar las listas.', 'danger');
+      }
+    }
+
+    async function deleteRecord(table, id) {
+      const labels = { orders:'pedido', event_memories:'evento de galería/memoria', inventory_items:'ítem de inventario', quotes:'cotización' };
+      const ok = confirm(`¿Borrar este ${labels[table] || 'registro'}? Esta acción no se puede deshacer.`);
+      if (!ok) return;
+      const client = window.HB.client();
+      const { error } = await client.from(table).delete().eq('id', id);
+      if (error) throw error;
+      showDeleteMessage('Registro borrado correctamente.', 'info');
+      await loadDashboardCounts();
+      await loadCleanupLists();
+    }
+
+    document.addEventListener('click', async (event) => {
+      const btn = event.target.closest('[data-delete-table]');
+      if (!btn) return;
+      try {
+        await deleteRecord(btn.dataset.deleteTable, btn.dataset.deleteId);
+      } catch (error) {
+        showDeleteMessage(error.message || 'No se pudo borrar el registro.', 'danger');
+      }
+    });
+
     async function init() {
       if (!window.HB.isConfigured()) {
         document.getElementById('loginRequired').style.display = 'none';
         document.getElementById('dashboardPanel').style.display = 'block';
+        await loadCleanupLists();
         return;
       }
       const session = await window.HB.getSession();
@@ -90,14 +198,11 @@
       }
       document.getElementById('loginRequired').style.display = 'none';
       document.getElementById('dashboardPanel').style.display = 'block';
-      try {
-        document.getElementById('newOrders').textContent = await countTable('orders', q => q.eq('status', 'new'));
-        document.getElementById('publicPhotos').textContent = await countTable('event_memory_photos', q => q.eq('is_public', true));
-        document.getElementById('inventoryCount').textContent = await countTable('inventory_items');
-        document.getElementById('quotesCount').textContent = await countTable('quotes');
-      } catch (error) {}
+      await loadDashboardCounts();
+      await loadCleanupLists();
     }
 
+    document.getElementById('refreshLists').addEventListener('click', loadCleanupLists);
     document.getElementById('logoutButton').addEventListener('click', async () => {
       await window.HB.signOut();
       window.location.href = 'login.html';
