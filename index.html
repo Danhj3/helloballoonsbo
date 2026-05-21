@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello Balloons | Decoración rentable e inteligente</title>
+  <title>Hello Balloons | Cuéntanos tu evento</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -19,52 +19,53 @@
         </a>
         <div class="hb-nav-links">
           <a class="active" href="index.html">Inicio</a>
-          <a href="cotizador.html">Cotizador</a>
-          <a href="inventario-app.html">Inventario</a>
-          <a href="rutas.html">Rutas</a>
+          <a href="cuentanos-tu-evento.html">Cotizar</a>
+          <a href="cotizador.html">Interno</a>
           <a href="admin.html">Admin</a>
         </div>
       </div>
     </nav>
 
     <header class="hb-hero">
-      <div class="hb-container hb-hero-grid">
-        <div>
-          <div class="hb-eyebrow">Decoración, cotización y operación en un solo sistema</div>
-          <h1 class="hb-title">Eventos hermosos, <span>números claros.</span></h1>
-          <p class="hb-lead">Hello Balloons ahora puede trabajar con cotización rentable, inventario por color, cálculo de transporte desde El Palmar y planificación de rutas para varios eventos en un mismo día.</p>
-          <div class="hb-actions">
-            <a class="hb-button primary" href="cotizador.html">Crear cotización</a>
-            <a class="hb-button secondary" href="pedidos.html">Formulario cliente</a>
-          </div>
+      <div class="hb-container hb-hero-centered">
+        <div class="hb-logo-hero">
+          <img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" />
         </div>
-        <div class="hb-visual-card">
-          <div class="hb-visual-badge">
-            <strong>Regla operativa 50/50</strong>
-            <span class="hb-muted">El sistema alerta si los costos superan la mitad del precio final.</span>
-          </div>
+        <div class="hb-eyebrow">Decoración de escenarios para eventos</div>
+        <h1 class="hb-title">Cuéntanos tu evento, <span>paso a paso.</span></h1>
+        <p class="hb-lead">No necesitas tener todo decidido. Te guiamos de forma sencilla para ordenar tu idea, elegir el tipo de decoración y enviarnos una solicitud clara.</p>
+        <div class="hb-actions">
+          <a class="hb-button pink" href="cuentanos-tu-evento.html">Empezar cotización</a>
+          <a class="hb-button secondary" href="#como-funciona">Ver cómo funciona</a>
         </div>
       </div>
     </header>
 
     <main>
-      <section class="hb-section">
+      <section id="como-funciona" class="hb-section">
         <div class="hb-container">
-          <div class="hb-grid-3">
-            <article class="hb-kpi">
-              <span>Base logística</span>
-              <strong>El Palmar</strong>
-              <small class="hb-muted">-17.830615, -63.157275</small>
+          <div class="hb-section-header">
+            <div>
+              <h2>Una experiencia tranquila</h2>
+              <p class="hb-muted">Como pedir un servicio por app: eliges poco a poco, revisas y envías.</p>
+            </div>
+          </div>
+          <div class="hb-grid-4">
+            <article class="hb-card pad">
+              <h3>1. Tipo de evento</h3>
+              <p class="hb-muted">Bautizo, cumpleaños, baby shower, revelación, graduación u otro.</p>
             </article>
-            <article class="hb-kpi">
-              <span>Margen objetivo</span>
-              <strong>50%</strong>
-              <small class="hb-muted">precio mínimo = costo ÷ 0.5</small>
+            <article class="hb-card pad">
+              <h3>2. Estilo</h3>
+              <p class="hb-muted">Sencillo, medio o completo. Sin presión ni términos complicados.</p>
             </article>
-            <article class="hb-kpi">
-              <span>Backend</span>
-              <strong>Supabase</strong>
-              <small class="hb-muted">Auth, RLS, cotizaciones, inventario y rutas</small>
+            <article class="hb-card pad">
+              <h3>3. Colores y lugar</h3>
+              <p class="hb-muted">Puedes pegar el link de Google Maps o escribir la zona.</p>
+            </article>
+            <article class="hb-card pad">
+              <h3>4. Revisar y enviar</h3>
+              <p class="hb-muted">Ves el resumen antes de mandarlo y respondemos por WhatsApp.</p>
             </article>
           </div>
         </div>
@@ -74,30 +75,12 @@
         <div class="hb-container">
           <div class="hb-section-header">
             <div>
-              <h2>Servicios</h2>
-              <p class="hb-muted">Se cargan desde Supabase cuando configures la anon key pública.</p>
+              <h2>Ideas frecuentes</h2>
+              <p class="hb-muted">Puedes empezar desde una idea simple. Después ordenamos los detalles.</p>
             </div>
-            <a class="hb-button secondary" href="cotizador.html">Cotizar</a>
           </div>
           <div id="servicesGrid" class="hb-grid-3"></div>
           <div id="setupNotice" class="hb-alert warn" style="display:none;margin-top:18px"></div>
-        </div>
-      </section>
-
-      <section class="hb-section">
-        <div class="hb-container hb-grid-3">
-          <article class="hb-card pad">
-            <h3>Cotización rentable</h3>
-            <p class="hb-muted">Materiales, personal, transporte, alquiler externo, pintura y extras se suman al costo total antes de definir precio.</p>
-          </article>
-          <article class="hb-card pad">
-            <h3>Inventario con memoria</h3>
-            <p class="hb-muted">Cada mueble puede tener color actual, estado, ubicación, condición, foto, historial y reservas por fecha.</p>
-          </article>
-          <article class="hb-card pad">
-            <h3>Rutas y tiempos</h3>
-            <p class="hb-muted">El sistema prepara la base para ordenar eventos del día, detectar conflictos y reducir costos de traslado.</p>
-          </article>
         </div>
       </section>
     </main>
@@ -118,22 +101,19 @@
       const grid = document.getElementById('servicesGrid');
       const notice = document.getElementById('setupNotice');
       const services = await window.HB.fetchServices();
-      grid.innerHTML = services.map(service => `
-        <article class="hb-card">
-          <img class="hb-card-img" src="${window.HB.escapeAttr(service.image_url || window.HB.brand.heroImage)}" alt="${window.HB.escapeAttr(service.name)}" />
-          <div class="hb-card-body">
-            <h3>${window.HB.escapeHtml(service.name)}</h3>
-            <p class="hb-muted">${window.HB.escapeHtml(service.description || 'Servicio personalizado para tu evento.')}</p>
-            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:16px">
-              <span class="hb-price">${window.HB.money(service.base_price, service.currency)}</span>
-              <a class="hb-button primary" href="cotizador.html?service=${encodeURIComponent(service.id)}">Usar</a>
-            </div>
+      grid.innerHTML = services.slice(0, 3).map(service => `
+        <article class="hb-card pad">
+          <h3>${window.HB.escapeHtml(service.name)}</h3>
+          <p class="hb-muted">${window.HB.escapeHtml(service.description || 'Servicio personalizado para tu evento.')}</p>
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:16px">
+            <span class="hb-price">Desde ${window.HB.money(service.base_price, service.currency)}</span>
+            <a class="hb-button secondary" href="cuentanos-tu-evento.html">Elegir</a>
           </div>
         </article>
       `).join('');
 
       if (!window.HB.isConfigured()) {
-        notice.textContent = 'Falta configurar la anon key pública de Supabase. La web muestra datos de ejemplo mientras tanto.';
+        notice.textContent = 'La web está en modo prototipo si Supabase todavía no tiene todas las tablas ejecutadas.';
         notice.style.display = 'block';
       }
     });
