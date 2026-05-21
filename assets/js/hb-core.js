@@ -261,5 +261,50 @@
     return data || [];
   };
 
+  HB.renderInternalNav = function renderInternalNav() {
+    const current = window.location.pathname.split('/').pop() || 'dashboard.html';
+    const internalPages = [
+      'dashboard.html',
+      'admin.html',
+      'admin-galeria.html',
+      'inventario-app.html',
+      'rutas.html',
+      'cotizador.html',
+      'memoria-eventos.html'
+    ];
+
+    if (!internalPages.includes(current)) return;
+
+    const nav = document.querySelector('.hb-nav .hb-nav-inner');
+    if (!nav) return;
+
+    const items = [
+      { href: 'dashboard.html', label: 'Inicio' },
+      { href: 'admin.html', label: 'Pedidos' },
+      { href: 'admin-galeria.html', label: 'Galería' },
+      { href: 'inventario-app.html', label: 'Inventario' },
+      { href: 'rutas.html', label: 'Rutas' },
+      { href: 'cotizador.html', label: 'Cotizador' },
+      { href: 'memoria-eventos.html', label: 'Memoria' },
+      { href: 'index.html', label: 'Web pública' }
+    ];
+
+    nav.innerHTML = `
+      <a class="hb-brand" href="dashboard.html">
+        <img src="${HB.brand.logoUrl}" alt="Hello Balloons" />
+        <span>Dashboard</span>
+      </a>
+      <div class="hb-nav-links">
+        ${items.map(item => `<a class="${item.href === current ? 'active' : ''}" href="${item.href}">${item.label}</a>`).join('')}
+      </div>
+    `;
+  };
+
   window.HB = HB;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', HB.renderInternalNav);
+  } else {
+    HB.renderInternalNav();
+  }
 })();
