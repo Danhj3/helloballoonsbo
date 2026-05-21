@@ -3,11 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cuéntanos tu evento | Hello Balloons</title>
+  <title>Cotiza tu evento | Hello Balloons</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="assets/css/hb-app.css" />
+  <link rel="stylesheet" href="assets/css/hb-public.css" />
+  <style>
+    #mapPicker { height: 260px; border-radius: 24px; overflow: hidden; border: 1px solid var(--hb-line); margin-top: 14px; }
+    .hb-small-link { color: var(--hb-teal); font-weight: 900; text-decoration: none; }
+  </style>
 </head>
 <body>
   <main class="hb-app-page">
@@ -16,7 +22,7 @@
         <img class="hb-logo-mark" src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" />
         <span>Hello Balloons</span>
       </a>
-      <span id="stepCounter" class="hb-status pending">1 de 8</span>
+      <span id="stepCounter" class="hb-status pending">1 de 9</span>
     </header>
 
     <div class="hb-progress"><span id="progressBar"></span></div>
@@ -24,9 +30,8 @@
     <section class="hb-step-wrap">
       <div class="hb-step active" data-step="0">
         <div class="hb-question-card">
-          <h1>Cuéntanos tu evento ✨</h1>
-          <p>No necesitas saber exactamente qué pedir. Te guiamos paso a paso para ordenar la idea y enviarnos una solicitud clara.</p>
-          <div class="hb-mini-note">Sin IA por ahora: solo un flujo amable y ordenado.</div>
+          <h1>Vamos a cotizar tu evento ✨</h1>
+          <p>Te haremos algunas preguntas sencillas para entender la decoración que tienes en mente. Al final podrás revisar y enviar tu solicitud.</p>
           <div class="hb-actions">
             <button class="hb-button pink" type="button" data-next>Empezar</button>
           </div>
@@ -36,27 +41,27 @@
       <div class="hb-step" data-step="1">
         <div class="hb-question-card">
           <h2>¿Qué tipo de evento es?</h2>
-          <p>Elige la opción más cercana. Si no está, marca “Otro”.</p>
+          <p>Elige la opción más cercana.</p>
           <div class="hb-options grid" data-choice="eventType">
             <button class="hb-option" data-value="Bautizo"><strong>Bautizo</strong><small>Decoración delicada, elegante o sencilla.</small></button>
             <button class="hb-option" data-value="Cumpleaños"><strong>Cumpleaños</strong><small>Infantil, juvenil o adulto.</small></button>
             <button class="hb-option" data-value="Baby shower"><strong>Baby shower</strong><small>Tonos suaves, temática bebé o neutra.</small></button>
-            <button class="hb-option" data-value="Revelación"><strong>Revelación</strong><small>Decoración para anuncio de género.</small></button>
+            <button class="hb-option" data-value="Revelación"><strong>Revelación</strong><small>Decoración para anuncio especial.</small></button>
             <button class="hb-option" data-value="Graduación"><strong>Graduación</strong><small>Fotos, mesa y fondo para celebración.</small></button>
-            <button class="hb-option" data-value="Otro"><strong>Otro</strong><small>Cuéntanos en tus palabras.</small></button>
+            <button class="hb-option" data-value="Otro"><strong>Otro</strong><small>Lo escribes en detalle más adelante.</small></button>
           </div>
         </div>
       </div>
 
       <div class="hb-step" data-step="2">
         <div class="hb-question-card">
-          <h2>¿Qué tan completa quieres la decoración?</h2>
-          <p>Esto no fija el precio final, solo nos ayuda a entender el estilo.</p>
+          <h2>¿Qué estilo buscas?</h2>
+          <p>Esto nos ayuda a preparar una propuesta acorde a lo que imaginas.</p>
           <div class="hb-options" data-choice="packageLevel">
-            <button class="hb-option" data-value="Sencilla"><strong>Sencilla</strong><small>Algo bonito, limpio, sin demasiados elementos.</small></button>
+            <button class="hb-option" data-value="Sencilla"><strong>Sencilla</strong><small>Bonita, limpia y sin demasiados elementos.</small></button>
             <button class="hb-option" data-value="Media"><strong>Media</strong><small>Panel, mesa, globos y algunos detalles.</small></button>
-            <button class="hb-option" data-value="Completa"><strong>Completa</strong><small>Fondo, mobiliario, globos, detalles y montaje más elaborado.</small></button>
-            <button class="hb-option" data-value="No estoy seguro/a"><strong>No estoy seguro/a</strong><small>Te ayudamos a decidir según tu idea.</small></button>
+            <button class="hb-option" data-value="Completa"><strong>Completa</strong><small>Fondo, mobiliario, globos y detalles más elaborados.</small></button>
+            <button class="hb-option" data-value="No estoy seguro/a"><strong>No estoy seguro/a</strong><small>Podemos orientarte según tu idea.</small></button>
           </div>
         </div>
       </div>
@@ -64,7 +69,7 @@
       <div class="hb-step" data-step="3">
         <div class="hb-question-card">
           <h2>Colores o temática</h2>
-          <p>Puedes elegir algunos colores rápidos o escribir tu idea.</p>
+          <p>Elige colores y escribe cualquier detalle adicional. También puedes escribir otros colores.</p>
           <div class="hb-pill-row" data-multi="colors">
             <button class="hb-pill" data-value="Blanco">Blanco</button>
             <button class="hb-pill" data-value="Dorado">Dorado</button>
@@ -74,137 +79,134 @@
             <button class="hb-pill" data-value="Verde">Verde</button>
             <button class="hb-pill" data-value="Lila">Lila</button>
           </div>
-          <textarea id="themeText" class="hb-big-textarea" placeholder="Ej: como la foto, pero sencillo; globos celestes y blancos; tema Barbie; algo elegante..."></textarea>
+          <input id="otherColors" class="hb-big-input" placeholder="Otros colores: azul marino, plateado, nude..." />
+          <textarea id="themeText" class="hb-big-textarea" placeholder="Ej: como una foto de referencia, pero sencillo; tema Barbie; algo elegante; bautizo con tonos suaves..."></textarea>
         </div>
       </div>
 
       <div class="hb-step" data-step="4">
         <div class="hb-question-card">
-          <h2>¿Cuándo será?</h2>
-          <p>La fecha y horario ayudan a revisar disponibilidad y montaje.</p>
-          <div class="hb-inline" style="margin-top:22px">
-            <div class="hb-field">
-              <label>Fecha del evento</label>
-              <input id="eventDate" type="date" />
-            </div>
-            <div class="hb-field">
-              <label>Hora aproximada</label>
-              <input id="eventTime" type="time" />
-            </div>
+          <h2>Fotos de referencia</h2>
+          <p>Sube una o varias fotos para entender mejor el estilo que te gusta.</p>
+          <div class="hb-field" style="margin-top:22px">
+            <label>Fotos o capturas</label>
+            <input id="referencePhotos" type="file" accept="image/*" multiple />
           </div>
+          <p class="hb-muted" id="photoCountText">Puedes subirlas ahora o enviar la solicitud sin fotos.</p>
         </div>
       </div>
 
       <div class="hb-step" data-step="5">
         <div class="hb-question-card">
-          <h2>¿Dónde será?</h2>
-          <p>Pega el link de Google Maps si lo tienes. También puedes escribir la zona o salón.</p>
-          <textarea id="locationText" class="hb-big-textarea" placeholder="Link de Google Maps, salón, zona o dirección aproximada"></textarea>
+          <h2>¿Cuándo será?</h2>
+          <p>La fecha y hora nos ayudan a revisar disponibilidad.</p>
+          <div class="hb-inline" style="margin-top:22px">
+            <div class="hb-field"><label>Fecha del evento</label><input id="eventDate" type="date" /></div>
+            <div class="hb-field"><label>Hora aproximada</label><input id="eventTime" type="time" /></div>
+          </div>
         </div>
       </div>
 
       <div class="hb-step" data-step="6">
         <div class="hb-question-card">
-          <h2>Presupuesto y contacto</h2>
-          <p>El presupuesto es opcional, pero ayuda a ofrecer algo posible.</p>
-          <div class="hb-inline" style="margin-top:22px">
-            <div class="hb-field">
-              <label>Presupuesto aproximado</label>
-              <select id="budgetRange">
-                <option value="No indicado">Prefiero no indicar</option>
-                <option value="Económico">Económico</option>
-                <option value="Intermedio">Intermedio</option>
-                <option value="Más completo">Más completo</option>
-              </select>
-            </div>
-            <div class="hb-field">
-              <label>Nombre</label>
-              <input id="clientName" placeholder="Tu nombre" />
-            </div>
+          <h2>¿Dónde será?</h2>
+          <p>Pega el link de Google Maps, escribe el salón o marca un punto aproximado en el mapa.</p>
+          <textarea id="locationText" class="hb-big-textarea" placeholder="Link de Google Maps, nombre del salón, zona o dirección aproximada"></textarea>
+          <div class="hb-actions" style="margin-top:14px">
+            <a id="mapsSearchLink" class="hb-button secondary" target="_blank" rel="noopener" href="https://www.google.com/maps/search/salones+de+eventos+Santa+Cruz+de+la+Sierra">Buscar en Google Maps</a>
           </div>
-          <div class="hb-field" style="margin-top:14px">
-            <label>WhatsApp</label>
-            <input id="clientPhone" placeholder="Número para responderte" />
-          </div>
+          <div id="mapPicker"></div>
+          <p class="hb-muted" id="mapStatus">También puedes tocar el mapa para marcar un punto aproximado.</p>
         </div>
       </div>
 
       <div class="hb-step" data-step="7">
         <div class="hb-question-card">
+          <h2>Presupuesto y contacto</h2>
+          <p>El presupuesto puede ser un monto aproximado o puedes preferir no indicarlo.</p>
+          <div class="hb-inline" style="margin-top:22px">
+            <div class="hb-field"><label>Presupuesto aproximado en Bs.</label><input id="budgetAmount" type="number" min="0" step="1" placeholder="Ej. 800" /></div>
+            <div class="hb-field"><label>Nombre</label><input id="clientName" placeholder="Tu nombre" /></div>
+          </div>
+          <label class="hb-option" style="display:flex;gap:12px;align-items:flex-start;margin-top:14px">
+            <input id="budgetPrivate" type="checkbox" style="width:auto;margin-top:4px" />
+            <span><strong>Prefiero no indicar presupuesto</strong><small>Podemos orientarte con opciones según lo que busques.</small></span>
+          </label>
+          <div class="hb-field" style="margin-top:14px"><label>WhatsApp</label><input id="clientPhone" placeholder="Número para responderte" /></div>
+        </div>
+      </div>
+
+      <div class="hb-step" data-step="8">
+        <div class="hb-question-card">
           <h2>Revisa tu solicitud</h2>
-          <p>Así nos llegará tu idea. Puedes volver atrás si quieres ajustar algo.</p>
+          <p>Así recibiremos tu pedido. Si todo está bien, envíalo y también podrás abrir WhatsApp.</p>
           <div id="summaryBox" class="hb-client-summary"></div>
           <div id="submitMessage" class="hb-alert info" style="display:none;margin-top:18px"></div>
+          <div id="whatsappBox" style="display:none;margin-top:16px">
+            <a id="whatsappLink" class="hb-button primary" target="_blank" rel="noopener">Enviar también por WhatsApp</a>
+          </div>
         </div>
       </div>
     </section>
 
-    <div class="hb-bottom-bar">
-      <div class="hb-bottom-inner">
-        <button id="backButton" class="hb-button secondary" type="button">Atrás</button>
-        <button id="nextButton" class="hb-button pink" type="button">Siguiente</button>
-      </div>
-    </div>
+    <div class="hb-bottom-bar"><div class="hb-bottom-inner"><button id="backButton" class="hb-button secondary" type="button">Atrás</button><button id="nextButton" class="hb-button pink" type="button">Siguiente</button></div></div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="assets/js/supabase-config.js"></script>
   <script src="assets/js/hb-core.js"></script>
   <script>
-    const state = {
-      eventType: '',
-      packageLevel: '',
-      colors: [],
-      themeText: '',
-      eventDate: '',
-      eventTime: '',
-      locationText: '',
-      budgetRange: 'No indicado',
-      clientName: '',
-      clientPhone: ''
-    };
-
+    const JENNIFER_PHONE = '59175346838';
+    const state = { eventType:'', packageLevel:'', colors:[], otherColors:'', themeText:'', referencePhotoCount:0, eventDate:'', eventTime:'', locationText:'', mapLat:null, mapLng:null, budgetAmount:'', budgetPrivate:false, clientName:'', clientPhone:'' };
     let currentStep = 0;
-    const totalSteps = 8;
+    const totalSteps = 9;
     const steps = [...document.querySelectorAll('.hb-step')];
     const nextButton = document.getElementById('nextButton');
     const backButton = document.getElementById('backButton');
+    let map, marker;
 
     function syncInputsToState() {
-      state.themeText = document.getElementById('themeText')?.value.trim() || state.themeText;
-      state.eventDate = document.getElementById('eventDate')?.value || state.eventDate;
-      state.eventTime = document.getElementById('eventTime')?.value || state.eventTime;
-      state.locationText = document.getElementById('locationText')?.value.trim() || state.locationText;
-      state.budgetRange = document.getElementById('budgetRange')?.value || state.budgetRange;
-      state.clientName = document.getElementById('clientName')?.value.trim() || state.clientName;
-      state.clientPhone = document.getElementById('clientPhone')?.value.trim() || state.clientPhone;
+      state.otherColors = document.getElementById('otherColors')?.value.trim() || '';
+      state.themeText = document.getElementById('themeText')?.value.trim() || '';
+      state.referencePhotoCount = document.getElementById('referencePhotos')?.files?.length || 0;
+      state.eventDate = document.getElementById('eventDate')?.value || '';
+      state.eventTime = document.getElementById('eventTime')?.value || '';
+      state.locationText = document.getElementById('locationText')?.value.trim() || '';
+      state.budgetAmount = document.getElementById('budgetAmount')?.value || '';
+      state.budgetPrivate = Boolean(document.getElementById('budgetPrivate')?.checked);
+      state.clientName = document.getElementById('clientName')?.value.trim() || '';
+      state.clientPhone = document.getElementById('clientPhone')?.value.trim() || '';
     }
 
-    function valueOrDash(value) {
-      if (Array.isArray(value)) return value.length ? value.join(', ') : 'No indicado';
-      return value || 'No indicado';
+    function budgetLabel() { return state.budgetPrivate ? 'Prefiere no indicar' : (state.budgetAmount ? `Bs. ${state.budgetAmount}` : 'No indicado'); }
+    function allColors() { return [...state.colors, ...state.otherColors.split(',').map(x => x.trim()).filter(Boolean)]; }
+    function valueOrDash(value) { if (Array.isArray(value)) return value.length ? value.join(', ') : 'No indicado'; return value || 'No indicado'; }
+
+    function initMap() {
+      if (map || !window.L) return;
+      const base = window.HB.baseLocation();
+      map = L.map('mapPicker').setView([base.latitude, base.longitude], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+      map.on('click', e => {
+        state.mapLat = Number(e.latlng.lat.toFixed(6));
+        state.mapLng = Number(e.latlng.lng.toFixed(6));
+        if (marker) marker.setLatLng(e.latlng); else marker = L.marker(e.latlng).addTo(map);
+        document.getElementById('mapStatus').textContent = `Punto marcado: ${state.mapLat}, ${state.mapLng}`;
+      });
+      setTimeout(() => map.invalidateSize(), 200);
     }
 
     function renderSummary() {
       syncInputsToState();
-      const summary = [
-        ['Evento', state.eventType],
-        ['Nivel', state.packageLevel],
-        ['Colores', state.colors],
-        ['Idea / temática', state.themeText],
-        ['Fecha', state.eventDate],
-        ['Hora', state.eventTime],
-        ['Ubicación', state.locationText],
-        ['Presupuesto', state.budgetRange],
-        ['Nombre', state.clientName],
-        ['WhatsApp', state.clientPhone]
-      ];
-      document.getElementById('summaryBox').innerHTML = summary.map(([label, value]) => `
-        <div class="hb-summary-row">
-          <span>${window.HB.escapeHtml(label)}</span>
-          <span>${window.HB.escapeHtml(valueOrDash(value))}</span>
-        </div>
-      `).join('');
+      const locationValue = state.locationText || (state.mapLat ? `${state.mapLat}, ${state.mapLng}` : 'No indicado');
+      const summary = [['Evento', state.eventType], ['Estilo', state.packageLevel], ['Colores', allColors()], ['Idea / temática', state.themeText], ['Fotos de referencia', state.referencePhotoCount ? `${state.referencePhotoCount} archivo(s)` : 'No indicado'], ['Fecha', state.eventDate], ['Hora', state.eventTime], ['Ubicación', locationValue], ['Presupuesto', budgetLabel()], ['Nombre', state.clientName], ['WhatsApp', state.clientPhone]];
+      document.getElementById('summaryBox').innerHTML = summary.map(([label, value]) => `<div class="hb-summary-row"><span>${window.HB.escapeHtml(label)}</span><span>${window.HB.escapeHtml(valueOrDash(value))}</span></div>`).join('');
+    }
+
+    function buildWhatsAppText(orderNumber) {
+      const locationValue = state.locationText || (state.mapLat ? `${state.mapLat}, ${state.mapLng}` : 'No indicado');
+      return `Hola Jennifer, quiero cotizar con Hello Balloons.%0A%0AEvento: ${encodeURIComponent(state.eventType || 'No indicado')}%0AEstilo: ${encodeURIComponent(state.packageLevel || 'No indicado')}%0AColores: ${encodeURIComponent(allColors().join(', ') || 'No indicado')}%0AIdea: ${encodeURIComponent(state.themeText || 'No indicada')}%0AFecha: ${encodeURIComponent(state.eventDate || 'No indicada')}%0AHora: ${encodeURIComponent(state.eventTime || 'No indicada')}%0AUbicación: ${encodeURIComponent(locationValue)}%0APresupuesto: ${encodeURIComponent(budgetLabel())}%0ANombre: ${encodeURIComponent(state.clientName)}%0AWhatsApp: ${encodeURIComponent(state.clientPhone)}${orderNumber ? `%0ACódigo: ${encodeURIComponent(orderNumber)}` : ''}`;
     }
 
     function showStep(index) {
@@ -214,95 +216,68 @@
       document.getElementById('progressBar').style.width = `${((currentStep + 1) / totalSteps) * 100}%`;
       backButton.disabled = currentStep === 0;
       nextButton.textContent = currentStep === totalSteps - 1 ? 'Enviar solicitud' : 'Siguiente';
+      if (currentStep === 6) setTimeout(initMap, 120);
       if (currentStep === totalSteps - 1) renderSummary();
     }
 
-    document.querySelectorAll('[data-choice]').forEach(group => {
-      group.addEventListener('click', event => {
-        const button = event.target.closest('.hb-option');
-        if (!button) return;
-        event.preventDefault();
-        group.querySelectorAll('.hb-option').forEach(item => item.classList.remove('selected'));
-        button.classList.add('selected');
-        state[group.dataset.choice] = button.dataset.value;
-        setTimeout(() => showStep(currentStep + 1), 180);
-      });
+    document.getElementById('locationText').addEventListener('input', e => {
+      const q = e.target.value.trim() || 'salones de eventos Santa Cruz de la Sierra';
+      document.getElementById('mapsSearchLink').href = `https://www.google.com/maps/search/${encodeURIComponent(q)}`;
     });
+    document.getElementById('referencePhotos').addEventListener('change', e => { document.getElementById('photoCountText').textContent = e.target.files.length ? `${e.target.files.length} foto(s) seleccionada(s).` : 'Puedes subirlas ahora o enviar la solicitud sin fotos.'; });
 
-    document.querySelectorAll('[data-multi]').forEach(group => {
-      group.addEventListener('click', event => {
-        const button = event.target.closest('.hb-pill');
-        if (!button) return;
-        event.preventDefault();
-        button.classList.toggle('selected');
-        const key = group.dataset.multi;
-        state[key] = [...group.querySelectorAll('.hb-pill.selected')].map(item => item.dataset.value);
-      });
-    });
-
-    document.querySelectorAll('[data-next]').forEach(button => {
-      button.addEventListener('click', () => showStep(currentStep + 1));
-    });
-
+    document.querySelectorAll('[data-choice]').forEach(group => group.addEventListener('click', event => { const button = event.target.closest('.hb-option'); if (!button) return; event.preventDefault(); group.querySelectorAll('.hb-option').forEach(item => item.classList.remove('selected')); button.classList.add('selected'); state[group.dataset.choice] = button.dataset.value; setTimeout(() => showStep(currentStep + 1), 180); }));
+    document.querySelectorAll('[data-multi]').forEach(group => group.addEventListener('click', event => { const button = event.target.closest('.hb-pill'); if (!button) return; event.preventDefault(); button.classList.toggle('selected'); state[group.dataset.multi] = [...group.querySelectorAll('.hb-pill.selected')].map(item => item.dataset.value); }));
+    document.querySelectorAll('[data-next]').forEach(button => button.addEventListener('click', () => showStep(currentStep + 1)));
     backButton.addEventListener('click', () => showStep(currentStep - 1));
-    nextButton.addEventListener('click', async () => {
-      syncInputsToState();
-      if (currentStep < totalSteps - 1) {
-        showStep(currentStep + 1);
-        return;
+    nextButton.addEventListener('click', async () => { syncInputsToState(); if (currentStep < totalSteps - 1) { showStep(currentStep + 1); return; } await submitRequest(); });
+
+    async function uploadReferencePhotos(orderId) {
+      const files = document.getElementById('referencePhotos').files;
+      if (!files || !files.length || !window.HB.isConfigured()) return 0;
+      const client = window.HB.client();
+      let uploaded = 0;
+      for (const file of files) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, '-');
+        const path = `${orderId}/${Date.now()}-${safeName}`;
+        const { error: uploadError } = await client.storage.from('order-references').upload(path, file);
+        if (uploadError) throw uploadError;
+        const { error: dbError } = await client.from('order_reference_photos').insert({ order_id: orderId, storage_bucket: 'order-references', storage_path: path, original_filename: file.name, mime_type: file.type, file_size_bytes: file.size });
+        if (dbError) throw dbError;
+        uploaded++;
       }
-      await submitRequest();
-    });
+      return uploaded;
+    }
 
     async function submitRequest() {
       const box = document.getElementById('submitMessage');
-      const notes = [
-        `Nivel: ${state.packageLevel || 'No indicado'}`,
-        `Colores: ${state.colors.join(', ') || 'No indicado'}`,
-        `Idea: ${state.themeText || 'No indicada'}`,
-        `Ubicación: ${state.locationText || 'No indicada'}`,
-        `Presupuesto: ${state.budgetRange || 'No indicado'}`
-      ].join('\n');
+      const whatsappBox = document.getElementById('whatsappBox');
+      const whatsappLink = document.getElementById('whatsappLink');
+      const locationValue = state.locationText || (state.mapLat ? `${state.mapLat}, ${state.mapLng}` : '');
+      const notes = [`Estilo: ${state.packageLevel || 'No indicado'}`, `Colores: ${allColors().join(', ') || 'No indicado'}`, `Idea: ${state.themeText || 'No indicada'}`, `Fotos de referencia: ${state.referencePhotoCount}`, `Ubicación: ${locationValue || 'No indicada'}`, `Presupuesto: ${budgetLabel()}`, state.mapLat ? `Punto marcado: ${state.mapLat}, ${state.mapLng}` : ''].filter(Boolean).join('\n');
 
-      if (!state.clientName || !state.clientPhone) {
-        box.className = 'hb-alert warn';
-        box.textContent = 'Para enviarnos la solicitud necesitamos tu nombre y WhatsApp.';
-        box.style.display = 'block';
-        return;
-      }
+      if (!state.clientName || !state.clientPhone) { box.className = 'hb-alert warn'; box.textContent = 'Para enviar la solicitud necesitamos tu nombre y WhatsApp.'; box.style.display = 'block'; return; }
+      whatsappLink.href = `https://wa.me/${JENNIFER_PHONE}?text=${buildWhatsAppText('')}`;
+      whatsappBox.style.display = 'block';
 
-      if (!window.HB.isConfigured()) {
-        box.className = 'hb-alert warn';
-        box.textContent = 'Solicitud preparada en modo prototipo. Falta conexión real a Supabase para guardarla.';
-        box.style.display = 'block';
-        return;
-      }
+      if (!window.HB.isConfigured()) { box.className = 'hb-alert warn'; box.textContent = 'Tu solicitud está lista. Puedes enviarla por WhatsApp con el botón de abajo.'; box.style.display = 'block'; return; }
 
       try {
         const client = window.HB.client();
-        const orderPayload = {
-          client_name: state.clientName,
-          client_phone: state.clientPhone,
-          event_date: state.eventDate || new Date().toISOString().slice(0, 10),
-          event_type: state.eventType || 'Evento',
-          event_address: state.locationText || null,
-          notes,
-          total_amount: 0,
-          currency: 'BOB',
-          status: 'new'
-        };
-        const { data, error } = await client.rpc('create_order_with_items', {
-          order_payload: orderPayload,
-          items_payload: []
-        }).single();
+        const orderPayload = { client_name: state.clientName, client_phone: state.clientPhone, event_date: state.eventDate || new Date().toISOString().slice(0, 10), event_type: state.eventType || 'Evento', event_address: locationValue || null, desired_budget: state.budgetPrivate || !state.budgetAmount ? null : Number(state.budgetAmount), notes, total_amount: 0, currency: 'BOB', status: 'new' };
+        const { data, error } = await client.rpc('create_order_with_items', { order_payload: orderPayload, items_payload: [] }).single();
         if (error) throw error;
+        const orderId = data.id;
+        const orderNumber = data.order_number || data.id;
+        const uploaded = await uploadReferencePhotos(orderId);
+        whatsappLink.href = `https://wa.me/${JENNIFER_PHONE}?text=${buildWhatsAppText(orderNumber)}`;
         box.className = 'hb-alert info';
-        box.textContent = `Solicitud enviada correctamente. Código: ${data.order_number || data.id}. Te responderemos por WhatsApp.`;
+        box.textContent = `Solicitud enviada correctamente${uploaded ? ` con ${uploaded} foto(s)` : ''}. También puedes enviarla por WhatsApp.`;
         box.style.display = 'block';
         nextButton.disabled = true;
       } catch (error) {
         box.className = 'hb-alert danger';
-        box.textContent = error.message || 'No se pudo enviar la solicitud.';
+        box.textContent = error.message || 'No se pudo guardar. Puedes enviarla por WhatsApp con el botón de abajo.';
         box.style.display = 'block';
       }
     }
