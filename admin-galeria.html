@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galería Admin | Hello Balloons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hb-app.css" />
+</head>
+<body>
+  <nav class="hb-nav">
+    <div class="hb-nav-inner">
+      <a class="hb-brand" href="index.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Hello Balloons</span></a>
+      <div class="hb-nav-links">
+        <a href="index.html">Landing</a>
+        <a href="admin.html">Admin</a>
+        <a class="active" href="admin-galeria.html">Galería</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="hb-section">
+    <div class="hb-container">
+      <div class="hb-section-header">
+        <div>
+          <div class="hb-eyebrow">Administrador</div>
+          <h2>Subir fotos para la landing</h2>
+          <p class="hb-muted">Carga fotos aprobadas para mostrar en la página pública. No se muestran costos ni notas internas.</p>
+        </div>
+      </div>
+
+      <section id="loginPanel" class="hb-card pad" style="display:none;margin-bottom:18px">
+        <h3>Ingreso</h3>
+        <form id="loginForm" class="hb-form">
+          <div class="hb-inline">
+            <div class="hb-field"><label>Email</label><input id="email" type="email" required /></div>
+            <div class="hb-field"><label>Contraseña</label><input id="password" type="password" required /></div>
+          </div>
+          <button class="hb-button primary" type="submit">Entrar</button>
+        </form>
+        <div id="loginMessage" class="hb-alert danger" style="display:none;margin-top:14px"></div>
+      </section>
+
+      <section id="galleryPanel" style="display:none">
+        <div class="hb-grid-2">
+          <div class="hb-card pad">
+            <h3>Nuevo evento público</h3>
+            <form id="galleryForm" class="hb-form">
+              <div class="hb-field">
+                <label>Título para mostrar</label>
+                <input id="publicTitle" placeholder="Bautizo en tonos suaves" required />
+              </div>
+              <div class="hb-inline">
+                <div class="hb-field">
+                  <label>Tipo</label>
+                  <select id="eventType">
+                    <option>Bautizo</option>
+                    <option>Cumpleaños</option>
+                    <option>Baby shower</option>
+                    <option>Revelación</option>
+                    <option>Graduación</option>
+                    <option>Corporativo</option>
+                    <option>Otro</option>
+                  </select>
+                </div>
+                <div class="hb-field">
+                  <label>Fecha</label>
+                  <input id="eventDate" type="date" />
+                </div>
+              </div>
+              <div class="hb-field">
+                <label>Colores</label>
+                <input id="colors" placeholder="beige, blanco, dorado" />
+              </div>
+              <div class="hb-field">
+                <label>Fotos</label>
+                <input id="photos" type="file" accept="image/*" multiple required />
+              </div>
+              <button class="hb-button primary" type="submit">Publicar en galería</button>
+            </form>
+            <div id="formMessage" class="hb-alert info" style="display:none;margin-top:14px"></div>
+          </div>
+
+          <div class="hb-card pad">
+            <h3>Importante</h3>
+            <p class="hb-muted">Solo sube fotos que quieres mostrar públicamente. La landing usará estas imágenes para inspirar a nuevos clientes.</p>
+            <div class="hb-alert warn">Esta sección es solo para fotos públicas. La memoria interna de eventos sigue separada.</div>
+          </div>
+        </div>
+
+        <section class="hb-section">
+          <div class="hb-section-header">
+            <div><h2>Últimos eventos publicados</h2></div>
+            <button id="refreshButton" class="hb-button secondary" type="button">Actualizar</button>
+          </div>
+          <div id="galleryGrid" class="hb-grid-3"></div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/hb-core.js"></script>
+  <script>
+    function colorsArray(value) {
+      return String(value || '').split(',').map(item => item.trim()).filter(Boolean);
+    }
+
+    function showMessage(id, text, kind = 'info') {
+      const box = document.getElementById(id);
+      box.className = `hb-alert ${kind}`;
+      box.textContent = text;
+      box.style.display = 'block';
+    }
+
+    async function requireSession() {
+      if (!window.HB.isConfigured()) {
+        document.getElementById('loginPanel').style.display = 'none';
+        document.getElementById('galleryPanel').style.display = 'block';
+        showMessage('formMessage', 'Modo prototipo: configura Supabase y ejecuta las migraciones para subir fotos reales.', 'warn');
+        return;
+      }
+      const session = await window.HB.getSession();
+      document.getElementById('loginPanel').style.display = session ? 'none' : 'block';
+      document.getElementById('galleryPanel').style.display = session ? 'block' : 'none';
+      if (session) await loadGallery();
+    }
+
+    async function uploadPublicPhotos(memoryId, files) {
+      const client = window.HB.client();
+      let uploaded = 0;
+      for (const file of files) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, '-');
+        const path = `${memoryId}/${Date.now()}-${safeName}`;
+        const { error: uploadError } = await client.storage.from('event-gallery').upload(path, file);
+        if (uploadError) throw uploadError;
+        const { error: photoError } = await client.from('event_memory_photos').insert({
+          event_memory_id: memoryId,
+          storage_bucket: 'event-gallery',
+          storage_path: path,
+          original_filename: file.name,
+          mime_type: file.type,
+          file_size_bytes: file.size,
+          is_cover: uploaded === 0,
+          is_public: true,
+          display_order: uploaded
+        });
+        if (photoError) throw photoError;
+        uploaded++;
+      }
+      return uploaded;
+    }
+
+    async function loadGallery() {
+      const client = window.HB.client();
+      if (!client) {
+        document.getElementById('galleryGrid').innerHTML = '<div class="hb-alert warn">Galería en modo prototipo.</div>';
+        return;
+      }
+      const { data, error } = await client
+        .from('event_memories')
+        .select('id, public_title, title, event_type, event_date, color_palette, event_memory_photos(storage_bucket, storage_path, is_cover, is_public)')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(12);
+      if (error) throw error;
+
+      document.getElementById('galleryGrid').innerHTML = (data || []).map(item => {
+        const photo = (item.event_memory_photos || []).find(p => p.is_public) || (item.event_memory_photos || [])[0];
+        let image = '';
+        if (photo) {
+          image = client.storage.from(photo.storage_bucket).getPublicUrl(photo.storage_path).data.publicUrl;
+        }
+        return `
+          <article class="hb-card">
+            ${image ? `<img class="hb-card-img" src="${window.HB.escapeAttr(image)}" alt="${window.HB.escapeAttr(item.public_title || item.title)}" />` : ''}
+            <div class="hb-card-body">
+              <h3>${window.HB.escapeHtml(item.public_title || item.title)}</h3>
+              <p class="hb-muted">${window.HB.escapeHtml(item.event_type || '')}</p>
+            </div>
+          </article>
+        `;
+      }).join('') || '<div class="hb-alert warn">Todavía no hay fotos públicas.</div>';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      try {
+        await window.HB.signIn(document.getElementById('email').value.trim(), document.getElementById('password').value);
+        await requireSession();
+      } catch (error) {
+        showMessage('loginMessage', error.message || 'No se pudo iniciar sesión.', 'danger');
+      }
+    });
+
+    document.getElementById('galleryForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const client = window.HB.client();
+      if (!client) {
+        showMessage('formMessage', 'Modo prototipo: no se subieron fotos reales.', 'warn');
+        return;
+      }
+      try {
+        const title = document.getElementById('publicTitle').value.trim();
+        const payload = {
+          title,
+          public_title: title,
+          event_type: document.getElementById('eventType').value,
+          event_date: document.getElementById('eventDate').value || null,
+          color_palette: colorsArray(document.getElementById('colors').value),
+          is_public: true
+        };
+        const { data: memory, error } = await client.from('event_memories').insert(payload).select('id').single();
+        if (error) throw error;
+        const uploaded = await uploadPublicPhotos(memory.id, document.getElementById('photos').files);
+        showMessage('formMessage', `Evento publicado con ${uploaded} foto(s).`, 'info');
+        event.target.reset();
+        await loadGallery();
+      } catch (error) {
+        showMessage('formMessage', error.message || 'No se pudo publicar.', 'danger');
+      }
+    });
+
+    document.getElementById('refreshButton').addEventListener('click', loadGallery);
+    requireSession();
+  </script>
+</body>
+</html>
