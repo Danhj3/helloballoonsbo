@@ -29,9 +29,9 @@
         <div>
           <div class="hb-eyebrow">Planificación diaria</div>
           <h2>Rutas y horarios</h2>
-          <p class="hb-muted">Prototipo para ordenar eventos del día desde la base de El Palmar, estimar distancias y detectar horarios apretados.</p>
+          <p class="hb-muted">Pega el link de Google Maps de cada evento. El sistema intenta leer la ubicación, ordenar por hora y detectar riesgos de atraso.</p>
         </div>
-        <button class="hb-button primary" id="calculateRoute">Calcular ruta local</button>
+        <button class="hb-button primary" id="calculateRoute">Resolver y calcular ruta</button>
       </div>
 
       <div class="hb-grid-2">
@@ -63,15 +63,10 @@
                 <input id="serviceMinutes" type="number" value="90" min="10" step="10" />
               </div>
             </div>
-            <div class="hb-inline">
-              <div class="hb-field">
-                <label>Latitud</label>
-                <input id="stopLat" type="number" step="0.000001" placeholder="-17.7833" />
-              </div>
-              <div class="hb-field">
-                <label>Longitud</label>
-                <input id="stopLng" type="number" step="0.000001" placeholder="-63.1821" />
-              </div>
+            <div class="hb-field">
+              <label>Ubicación / Google Maps</label>
+              <textarea id="stopMapsInput" placeholder="Pega aquí el link compartido de Google Maps, enlace largo, dirección o coordenadas visibles."></textarea>
+              <small class="hb-muted">No hace falta copiar latitud y longitud por separado.</small>
             </div>
             <div class="hb-field">
               <label>Notas</label>
@@ -89,8 +84,8 @@
             <div class="hb-kpi"><span>Tiempo viaje</span><strong id="travelTotal">0 min</strong></div>
             <div class="hb-kpi"><span>Riesgo</span><strong id="riskTotal">Pendiente</strong></div>
           </div>
-          <div id="routeAdvice" class="hb-alert info" style="margin-top:18px">Agrega paradas y calcula una ruta local inicial.</div>
-          <div class="hb-alert warn" style="margin-top:18px">Esta pantalla ordena por hora límite. La optimización avanzada con tráfico real queda preparada para Google Routes/Route Optimization en Edge Functions.</div>
+          <div id="routeAdvice" class="hb-alert info" style="margin-top:18px">Agrega paradas y calcula una ruta inicial.</div>
+          <div class="hb-alert warn" style="margin-top:18px">Los links cortos de Google Maps se resuelven mejor con Supabase Function. Si aún no está desplegada, usa enlace largo o coordenadas visibles.</div>
         </aside>
       </div>
 
@@ -101,6 +96,7 @@
               <tr>
                 <th>Orden</th>
                 <th>Evento</th>
+                <th>Ubicación</th>
                 <th>Tipo</th>
                 <th>Hora límite</th>
                 <th>Servicio</th>
@@ -116,13 +112,14 @@
     </div>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase-config.js"></script>
   <script src="assets/js/hb-core.js"></script>
   <script>
     const base = window.HB.baseLocation();
     let stops = [
-      { name: 'Cumpleaños zona norte', type: 'setup', arrivalTime: '09:00', serviceMinutes: 120, latitude: -17.7602, longitude: -63.1750, notes: 'Montaje mediano' },
-      { name: 'Baby shower Equipetrol', type: 'setup', arrivalTime: '12:30', serviceMinutes: 90, latitude: -17.7699, longitude: -63.2034, notes: 'Llevar panel blanco' }
+      { name: 'Cumpleaños zona norte', type: 'setup', arrivalTime: '09:00', serviceMinutes: 120, mapsInput: '-17.7602, -63.1750', latitude: -17.7602, longitude: -63.1750, locationStatus: 'ok', notes: 'Montaje mediano' },
+      { name: 'Baby shower Equipetrol', type: 'setup', arrivalTime: '12:30', serviceMinutes: 90, mapsInput: '-17.7699, -63.2034', latitude: -17.7699, longitude: -63.2034, locationStatus: 'ok', notes: 'Llevar panel blanco' }
     ];
 
     function minutesFromHHMM(value) {
@@ -130,49 +127,102 @@
       return h * 60 + m;
     }
 
-    function hhmmFromMinutes(total) {
-      const h = Math.floor(total / 60).toString().padStart(2, '0');
-      const m = Math.round(total % 60).toString().padStart(2, '0');
-      return `${h}:${m}`;
+    function validCoords(stop) {
+      return Number.isFinite(Number(stop.latitude)) && Number.isFinite(Number(stop.longitude)) && Math.abs(Number(stop.latitude)) <= 90 && Math.abs(Number(stop.longitude)) <= 180;
     }
 
     function estimateTravel(origin, destination) {
+      if (!validCoords(origin) || !validCoords(destination)) return { km: 0, minutes: 0, unresolved: true };
       const km = window.HB.haversineKm(origin, destination) * 1.25;
       const minutes = Math.max(10, Math.round((km / 25) * 60));
       return { km: Number(km.toFixed(2)), minutes };
     }
 
+    async function resolveStopLocation(stop) {
+      if (validCoords(stop)) return stop;
+      const parsed = window.HB.parseMapsInput(stop.mapsInput || '');
+
+      if (!parsed) {
+        return { ...stop, locationStatus: 'sin_ubicacion' };
+      }
+
+      if (parsed.latitude && parsed.longitude) {
+        return { ...stop, latitude: parsed.latitude, longitude: parsed.longitude, locationStatus: 'ok' };
+      }
+
+      if ((parsed.needsServerResolve || parsed.addressText) && window.HB.isConfigured()) {
+        try {
+          const payload = parsed.needsServerResolve
+            ? { mapsUrl: parsed.mapsUrl, loadType: 'medium', useGoogleRoutes: true }
+            : { addressText: parsed.addressText, loadType: 'medium', useGoogleRoutes: true };
+          const remote = await window.HB.invoke('transport-estimate', payload);
+          if (remote.destination?.latitude && remote.destination?.longitude) {
+            return {
+              ...stop,
+              latitude: Number(remote.destination.latitude),
+              longitude: Number(remote.destination.longitude),
+              mapsInput: remote.destination.mapsUrl || stop.mapsInput,
+              locationStatus: 'ok'
+            };
+          }
+        } catch (error) {
+          return { ...stop, locationStatus: 'no_resuelto', locationError: error.message };
+        }
+      }
+
+      return { ...stop, locationStatus: parsed.needsServerResolve ? 'requiere_funcion' : 'direccion_sin_coordenadas' };
+    }
+
+    async function resolveAllStops() {
+      const resolved = [];
+      for (const stop of stops) {
+        resolved.push(await resolveStopLocation(stop));
+      }
+      stops = resolved;
+    }
+
+    function locationLabel(stop) {
+      if (validCoords(stop)) return `${Number(stop.latitude).toFixed(5)}, ${Number(stop.longitude).toFixed(5)}`;
+      if (stop.locationStatus === 'requiere_funcion') return 'Link corto: requiere función';
+      if (stop.locationStatus === 'direccion_sin_coordenadas') return 'Dirección sin coordenadas';
+      if (stop.locationError) return stop.locationError;
+      return 'Sin resolver';
+    }
+
     function render(calculated = false) {
       const sorted = [...stops].sort((a, b) => minutesFromHHMM(a.arrivalTime) - minutesFromHHMM(b.arrivalTime));
-      let previous = base;
+      let previous = { ...base, latitude: Number(base.latitude), longitude: Number(base.longitude) };
       let currentTime = null;
       let totalKm = 0;
       let totalMinutes = 0;
       let redCount = 0;
       let yellowCount = 0;
+      let unresolvedCount = 0;
 
       const rows = sorted.map((stop, index) => {
         const travel = calculated ? estimateTravel(previous, stop) : { km: 0, minutes: 0 };
+        if (travel.unresolved) unresolvedCount++;
         totalKm += travel.km;
         totalMinutes += travel.minutes;
         const arrivalLimit = minutesFromHHMM(stop.arrivalTime);
         if (currentTime === null) currentTime = Math.max(0, arrivalLimit - travel.minutes);
         else currentTime += travel.minutes;
         const slack = arrivalLimit - currentTime;
-        const risk = !calculated ? 'pending' : slack < 0 ? 'rojo' : slack < 25 ? 'amarillo' : 'verde';
+        const risk = !calculated ? 'pending' : travel.unresolved ? 'amarillo' : slack < 0 ? 'rojo' : slack < 25 ? 'amarillo' : 'verde';
         if (risk === 'rojo') redCount++;
         if (risk === 'amarillo') yellowCount++;
         const serviceEnd = Math.max(currentTime, arrivalLimit) + Number(stop.serviceMinutes || 0);
         currentTime = serviceEnd;
-        previous = stop;
+        if (validCoords(stop)) previous = stop;
         return `
           <tr>
             <td>${index + 1}</td>
             <td><strong>${window.HB.escapeHtml(stop.name)}</strong></td>
+            <td>${window.HB.escapeHtml(locationLabel(stop))}</td>
             <td>${window.HB.escapeHtml(stop.type)}</td>
             <td>${window.HB.escapeHtml(stop.arrivalTime)}</td>
             <td>${stop.serviceMinutes} min</td>
-            <td>${calculated ? `${travel.km} km / ${travel.minutes} min` : '-'}</td>
+            <td>${calculated ? (travel.unresolved ? 'Sin ubicación' : `${travel.km} km / ${travel.minutes} min`) : '-'}</td>
             <td><span class="hb-status ${risk}">${risk}</span></td>
             <td>${window.HB.escapeHtml(stop.notes || '')}</td>
           </tr>
@@ -185,33 +235,45 @@
       document.getElementById('travelTotal').textContent = `${totalMinutes} min`;
       const riskLabel = redCount ? 'Rojo' : yellowCount ? 'Amarillo' : calculated ? 'Verde' : 'Pendiente';
       document.getElementById('riskTotal').textContent = riskLabel;
-      const advice = redCount
-        ? 'Hay al menos una parada con riesgo de atraso. Conviene adelantar montaje, agregar ayudante o separar equipo.'
-        : yellowCount
-          ? 'La ruta es posible, pero con poco margen. Revisar carga, tráfico y tiempo de desmontaje.'
-          : calculated
-            ? 'Ruta inicial viable con los horarios cargados.'
-            : 'Agrega paradas y calcula una ruta local inicial.';
-      document.getElementById('routeAdvice').className = `hb-alert ${redCount ? 'danger' : yellowCount ? 'warn' : 'info'}`;
+      const advice = unresolvedCount
+        ? 'Hay paradas sin ubicación resuelta. Pega enlace largo, coordenadas visibles o despliega la función para resolver links cortos.'
+        : redCount
+          ? 'Hay al menos una parada con riesgo de atraso. Conviene adelantar montaje, agregar ayudante o separar equipo.'
+          : yellowCount
+            ? 'La ruta es posible, pero con poco margen. Revisar carga, tráfico y tiempo de desmontaje.'
+            : calculated
+              ? 'Ruta inicial viable con los horarios cargados.'
+              : 'Agrega paradas y calcula una ruta inicial.';
+      document.getElementById('routeAdvice').className = `hb-alert ${redCount ? 'danger' : (yellowCount || unresolvedCount) ? 'warn' : 'info'}`;
       document.getElementById('routeAdvice').textContent = advice;
     }
 
     document.getElementById('stopForm').addEventListener('submit', (event) => {
       event.preventDefault();
+      const mapsInput = document.getElementById('stopMapsInput').value.trim();
+      const parsed = window.HB.parseMapsInput(mapsInput);
       stops.push({
         name: document.getElementById('stopName').value.trim() || 'Evento sin nombre',
         type: document.getElementById('stopType').value,
         arrivalTime: document.getElementById('arrivalTime').value || '09:00',
         serviceMinutes: Number(document.getElementById('serviceMinutes').value || 60),
-        latitude: Number(document.getElementById('stopLat').value || base.latitude),
-        longitude: Number(document.getElementById('stopLng').value || base.longitude),
+        mapsInput,
+        latitude: parsed?.latitude,
+        longitude: parsed?.longitude,
+        locationStatus: parsed?.latitude ? 'ok' : parsed?.needsServerResolve ? 'requiere_funcion' : 'pendiente',
         notes: document.getElementById('stopNotes').value.trim()
       });
       event.target.reset();
       render(false);
     });
 
-    document.getElementById('calculateRoute').addEventListener('click', () => render(true));
+    document.getElementById('calculateRoute').addEventListener('click', async () => {
+      document.getElementById('routeAdvice').className = 'hb-alert info';
+      document.getElementById('routeAdvice').textContent = 'Resolviendo ubicaciones y calculando ruta...';
+      await resolveAllStops();
+      render(true);
+    });
+
     render(false);
   </script>
 </body>
