@@ -4,197 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inventario | Hello Balloons</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/hb-app.css" />
+  <link rel="stylesheet" href="assets/css/hb-app.css" /><link rel="stylesheet" href="assets/css/hb-public.css" />
+  <style>.hb-danger-button{background:#fff;color:#a1284b;border:1px solid rgba(226,85,123,.28);box-shadow:none}.hb-actions-inline{display:flex;gap:8px;flex-wrap:wrap}.hb-table td{vertical-align:middle}</style>
 </head>
 <body>
-  <nav class="hb-nav">
-    <div class="hb-nav-inner">
-      <a class="hb-brand" href="index.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Hello Balloons</span></a>
-      <div class="hb-nav-links">
-        <a href="index.html">Inicio</a>
-        <a href="cotizador.html">Cotizador</a>
-        <a class="active" href="inventario-app.html">Inventario</a>
-        <a href="rutas.html">Rutas</a>
-        <a href="admin.html">Admin</a>
-      </div>
+  <nav class="hb-nav"><div class="hb-nav-inner"><a class="hb-brand" href="dashboard.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Dashboard</span></a><div class="hb-nav-links"><a href="dashboard.html">Analytics</a><a href="admin-galeria.html">Galería</a><a class="active" href="inventario-app.html">Inventario</a><a href="rutas.html">Rutas</a><a href="cotizador.html">Cotizador</a><a href="memoria-eventos.html">Memoria</a><a href="index.html">Web pública</a></div></div></nav>
+  <main class="hb-section"><div class="hb-container">
+    <div class="hb-section-header"><div><div class="hb-eyebrow">Inventario</div><h2>Inventario operativo</h2><p class="hb-muted">Actualiza, edita, borra y exporta muebles, colores, estado y ubicación.</p></div><div class="hb-actions" style="margin-top:0"><button id="exportInventory" class="hb-button primary" type="button">Exportar Excel</button><button id="refreshInventory" class="hb-button secondary" type="button">Actualizar</button></div></div>
+    <div id="setupNotice" class="hb-alert warn" style="display:none;margin-bottom:18px"></div>
+    <div class="hb-grid-2">
+      <section class="hb-card pad"><h3 id="formTitle">Agregar / actualizar ítem</h3><form id="inventoryForm" class="hb-form"><input id="itemId" type="hidden" /><div class="hb-field"><label>Código</label><input id="itemCode" placeholder="PANEL-001" /></div><div class="hb-field"><label>Nombre</label><input id="itemName" placeholder="Panel circular grande" /></div><div class="hb-inline"><div class="hb-field"><label>Color actual</label><input id="itemColor" /></div><div class="hb-field"><label>Estado</label><select id="itemStatus"><option value="available">Disponible</option><option value="reserved">Reservado</option><option value="in_use">En uso</option><option value="maintenance">Mantenimiento</option><option value="requires_paint">Requiere pintura</option><option value="damaged">Dañado</option><option value="out_of_service">Fuera de servicio</option></select></div></div><div class="hb-field"><label>Ubicación actual</label><input id="itemLocation" placeholder="Base, evento, taller..." /></div><div class="hb-field"><label>Condición / notas</label><textarea id="itemNotes"></textarea></div><div class="hb-actions"><button class="hb-button primary" type="submit">Guardar</button><button id="cancelEdit" class="hb-button secondary" type="button">Limpiar</button></div></form><div id="formMessage" class="hb-alert info" style="display:none;margin-top:16px"></div></section>
+      <section class="hb-card pad"><h3>Resumen</h3><div class="hb-grid-2" style="margin-top:14px"><div class="hb-kpi"><span>Disponible</span><strong id="availableCount">0</strong></div><div class="hb-kpi"><span>Revisar</span><strong id="reviewCount">0</strong></div></div><div class="hb-alert warn" style="margin-top:18px">Antes de confirmar una decoración, revisa reservados, mantenimiento y pintura.</div></section>
     </div>
-  </nav>
-
-  <main class="hb-section">
-    <div class="hb-container">
-      <div class="hb-section-header">
-        <div>
-          <div class="hb-eyebrow">Color, estado y disponibilidad</div>
-          <h2>Inventario operativo</h2>
-          <p class="hb-muted">Pensado para que el trabajador actualice color, estado, ubicación y condición desde el celular.</p>
-        </div>
-      </div>
-
-      <div id="setupNotice" class="hb-alert warn" style="display:none;margin-bottom:18px">Falta la anon key pública de Supabase. Esta pantalla mostrará una estructura de ejemplo.</div>
-
-      <div class="hb-grid-2">
-        <section class="hb-card pad">
-          <h3>Actualización rápida</h3>
-          <form id="inventoryForm" class="hb-form">
-            <div class="hb-field">
-              <label>Código del mueble</label>
-              <input id="itemCode" placeholder="Ej. PANEL-001" />
-            </div>
-            <div class="hb-field">
-              <label>Nombre</label>
-              <input id="itemName" placeholder="Panel circular grande" />
-            </div>
-            <div class="hb-inline">
-              <div class="hb-field">
-                <label>Color actual</label>
-                <input id="itemColor" placeholder="Blanco, dorado, rosado..." />
-              </div>
-              <div class="hb-field">
-                <label>Estado</label>
-                <select id="itemStatus">
-                  <option value="available">Disponible</option>
-                  <option value="reserved">Reservado</option>
-                  <option value="in_use">En uso</option>
-                  <option value="maintenance">Mantenimiento</option>
-                  <option value="requires_paint">Requiere pintura</option>
-                  <option value="damaged">Dañado</option>
-                  <option value="out_of_service">Fuera de servicio</option>
-                </select>
-              </div>
-            </div>
-            <div class="hb-field">
-              <label>Ubicación actual</label>
-              <input id="itemLocation" placeholder="Base, evento, taller, depósito..." />
-            </div>
-            <div class="hb-field">
-              <label>Condición / notas</label>
-              <textarea id="itemNotes" placeholder="Rayado leve, necesita retoque, volvió sucio..."></textarea>
-            </div>
-            <button class="hb-button primary" type="submit">Guardar actualización</button>
-          </form>
-          <div id="formMessage" class="hb-alert info" style="display:none;margin-top:16px"></div>
-        </section>
-
-        <section class="hb-card pad">
-          <h3>Lectura operativa</h3>
-          <p class="hb-muted">La IA podrá usar estos datos como fuente de verdad, pero no debe inventarlos. Si no hay actualización reciente, debe advertir: “verificar antes de confirmar”.</p>
-          <div class="hb-grid-2" style="margin-top:14px">
-            <div class="hb-kpi"><span>Disponible</span><strong id="availableCount">0</strong></div>
-            <div class="hb-kpi"><span>Revisar</span><strong id="reviewCount">0</strong></div>
-          </div>
-          <div class="hb-alert warn" style="margin-top:18px">Si un mueble ya está reservado, la base evita solapamientos cuando se registran reservas reales en Supabase.</div>
-        </section>
-      </div>
-
-      <section class="hb-section">
-        <div class="hb-table-wrap">
-          <table class="hb-table">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Mueble</th>
-                <th>Color</th>
-                <th>Estado</th>
-                <th>Ubicación</th>
-                <th>Notas</th>
-              </tr>
-            </thead>
-            <tbody id="inventoryTable"></tbody>
-          </table>
-        </div>
-      </section>
-    </div>
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase-config.js"></script>
-  <script src="assets/js/hb-core.js"></script>
+    <section class="hb-section"><div class="hb-table-wrap"><table class="hb-table"><thead><tr><th>Código</th><th>Mueble</th><th>Color</th><th>Estado</th><th>Ubicación</th><th>Notas</th><th>Acciones</th></tr></thead><tbody id="inventoryTable"></tbody></table></div></section>
+  </div></main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/supabase-config.js?v=inventory-edit"></script><script src="assets/js/hb-core.js?v=inventory-edit"></script>
   <script>
-    let inventory = [
-      { code: 'PANEL-001', name: 'Panel circular grande', current_color: 'Blanco', current_status: 'available', current_location: 'Base', condition_notes: 'Listo para uso' },
-      { code: 'MESA-001', name: 'Mesa cilíndrica', current_color: 'Dorado', current_status: 'requires_paint', current_location: 'Base', condition_notes: 'Requiere retoque antes de evento elegante' }
-    ];
-
-    function render() {
-      const table = document.getElementById('inventoryTable');
-      table.innerHTML = inventory.map(item => `
-        <tr>
-          <td>${window.HB.escapeHtml(item.code)}</td>
-          <td><strong>${window.HB.escapeHtml(item.name)}</strong></td>
-          <td>${window.HB.escapeHtml(item.current_color || '-')}</td>
-          <td><span class="hb-status ${['available'].includes(item.current_status) ? 'verde' : ['requires_paint','maintenance','reserved','in_use'].includes(item.current_status) ? 'amarillo' : 'rojo'}">${window.HB.escapeHtml(item.current_status)}</span></td>
-          <td>${window.HB.escapeHtml(item.current_location || '-')}</td>
-          <td>${window.HB.escapeHtml(item.condition_notes || '-')}</td>
-        </tr>
-      `).join('');
-      document.getElementById('availableCount').textContent = inventory.filter(i => i.current_status === 'available').length;
-      document.getElementById('reviewCount').textContent = inventory.filter(i => i.current_status !== 'available').length;
-    }
-
-    async function load() {
-      if (!window.HB.isConfigured()) {
-        document.getElementById('setupNotice').style.display = 'block';
-        render();
-        return;
-      }
-      try {
-        inventory = await window.HB.fetchInventory();
-      } catch (error) {
-        document.getElementById('setupNotice').textContent = error.message || 'No se pudo cargar inventario.';
-        document.getElementById('setupNotice').style.display = 'block';
-      }
-      render();
-    }
-
-    document.getElementById('inventoryForm').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const item = {
-        code: document.getElementById('itemCode').value.trim(),
-        name: document.getElementById('itemName').value.trim(),
-        current_color: document.getElementById('itemColor').value.trim(),
-        current_status: document.getElementById('itemStatus').value,
-        current_location: document.getElementById('itemLocation').value.trim() || 'Base',
-        condition_notes: document.getElementById('itemNotes').value.trim()
-      };
-      const message = document.getElementById('formMessage');
-
-      if (!item.code || !item.name) {
-        message.textContent = 'Código y nombre son obligatorios.';
-        message.className = 'hb-alert danger';
-        message.style.display = 'block';
-        return;
-      }
-
-      if (!window.HB.isConfigured()) {
-        inventory.unshift(item);
-        render();
-        message.textContent = 'Guardado en modo prototipo local. Configura Supabase para guardar real.';
-        message.className = 'hb-alert warn';
-        message.style.display = 'block';
-        event.target.reset();
-        return;
-      }
-
-      try {
-        const client = window.HB.client();
-        const { error } = await client.from('inventory_items').upsert(item, { onConflict: 'code' });
-        if (error) throw error;
-        await load();
-        message.textContent = 'Inventario actualizado.';
-        message.className = 'hb-alert info';
-        message.style.display = 'block';
-        event.target.reset();
-      } catch (error) {
-        message.textContent = error.message || 'No se pudo guardar.';
-        message.className = 'hb-alert danger';
-        message.style.display = 'block';
-      }
-    });
-
-    load();
+    let inventory=[{code:'PANEL-001',name:'Panel circular grande',current_color:'Blanco',current_status:'available',current_location:'Base',condition_notes:'Listo para uso'},{code:'MESA-001',name:'Mesa cilíndrica',current_color:'Dorado',current_status:'requires_paint',current_location:'Base',condition_notes:'Requiere retoque'}];
+    function msg(t,k='info'){const m=document.getElementById('formMessage');m.textContent=t;m.className=`hb-alert ${k}`;m.style.display='block'}
+    function statusClass(s){return s==='available'?'verde':['requires_paint','maintenance','reserved','in_use'].includes(s)?'amarillo':'rojo'}
+    function render(){document.getElementById('inventoryTable').innerHTML=inventory.map(item=>`<tr><td>${window.HB.escapeHtml(item.code)}</td><td><strong>${window.HB.escapeHtml(item.name)}</strong></td><td>${window.HB.escapeHtml(item.current_color||'-')}</td><td><span class="hb-status ${statusClass(item.current_status)}">${window.HB.escapeHtml(item.current_status)}</span></td><td>${window.HB.escapeHtml(item.current_location||'-')}</td><td>${window.HB.escapeHtml(item.condition_notes||'-')}</td><td><div class="hb-actions-inline"><button class="hb-button secondary" data-edit="${item.id||item.code}">Editar</button><button class="hb-button hb-danger-button" data-delete="${item.id||''}" data-code="${window.HB.escapeAttr(item.code)}">Borrar</button></div></td></tr>`).join('');document.getElementById('availableCount').textContent=inventory.filter(i=>i.current_status==='available').length;document.getElementById('reviewCount').textContent=inventory.filter(i=>i.current_status!=='available').length}
+    async function load(){if(!window.HB.isConfigured()){document.getElementById('setupNotice').textContent='Modo prototipo: conecta Supabase para guardar real.';document.getElementById('setupNotice').style.display='block';render();return}try{inventory=await window.HB.fetchInventory()}catch(e){document.getElementById('setupNotice').textContent=e.message||'No se pudo cargar inventario.';document.getElementById('setupNotice').style.display='block'}render()}
+    function clearForm(){document.getElementById('inventoryForm').reset();document.getElementById('itemId').value='';document.getElementById('formTitle').textContent='Agregar / actualizar ítem'}
+    function editItem(key){const item=inventory.find(i=>(i.id||i.code)===key);if(!item)return;document.getElementById('itemId').value=item.id||'';document.getElementById('itemCode').value=item.code||'';document.getElementById('itemName').value=item.name||'';document.getElementById('itemColor').value=item.current_color||'';document.getElementById('itemStatus').value=item.current_status||'available';document.getElementById('itemLocation').value=item.current_location||'';document.getElementById('itemNotes').value=item.condition_notes||'';document.getElementById('formTitle').textContent='Editar ítem'}
+    async function deleteItem(id,code){if(!confirm('¿Borrar este ítem de inventario?'))return;if(!window.HB.isConfigured()){inventory=inventory.filter(i=>i.code!==code);render();return}const c=window.HB.client();const q=id?c.from('inventory_items').delete().eq('id',id):c.from('inventory_items').delete().eq('code',code);const {error}=await q;if(error)throw error;await load();msg('Ítem borrado.','info')}
+    function exportCsv(){const h=['codigo','nombre','color','estado','ubicacion','notas'];const csv=[h.join(',')].concat(inventory.map(i=>[i.code,i.name,i.current_color,i.current_status,i.current_location,i.condition_notes].map(v=>`"${String(v||'').replaceAll('"','""')}"`).join(','))).join('\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`hello-balloons-inventario-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(a.href)}
+    document.getElementById('inventoryForm').addEventListener('submit',async e=>{e.preventDefault();const id=document.getElementById('itemId').value;const item={code:document.getElementById('itemCode').value.trim(),name:document.getElementById('itemName').value.trim(),current_color:document.getElementById('itemColor').value.trim(),current_status:document.getElementById('itemStatus').value,current_location:document.getElementById('itemLocation').value.trim()||'Base',condition_notes:document.getElementById('itemNotes').value.trim()};if(!item.code||!item.name){msg('Código y nombre son obligatorios.','danger');return}if(!window.HB.isConfigured()){const idx=inventory.findIndex(i=>i.code===item.code);if(idx>=0)inventory[idx]=item;else inventory.unshift(item);render();msg('Guardado en modo prototipo.','warn');clearForm();return}try{const c=window.HB.client();const {error}=id?await c.from('inventory_items').update(item).eq('id',id):await c.from('inventory_items').upsert(item,{onConflict:'code'});if(error)throw error;await load();msg('Inventario actualizado.','info');clearForm()}catch(err){msg(err.message||'No se pudo guardar.','danger')}});
+    document.addEventListener('click',async e=>{const ed=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');try{if(ed)editItem(ed.dataset.edit);if(del)await deleteItem(del.dataset.delete,del.dataset.code)}catch(err){msg(err.message||'No se pudo completar la acción.','danger')}});document.getElementById('cancelEdit').addEventListener('click',clearForm);document.getElementById('exportInventory').addEventListener('click',exportCsv);document.getElementById('refreshInventory').addEventListener('click',load);load();
   </script>
 </body>
 </html>
