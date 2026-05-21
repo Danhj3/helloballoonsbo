@@ -4,277 +4,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rutas | Hello Balloons</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/hb-app.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="assets/css/hb-app.css" /><link rel="stylesheet" href="assets/css/hb-public.css" />
+  <style>#routeMap{height:420px;border-radius:24px;overflow:hidden;border:1px solid var(--hb-line);background:#fff}.hb-danger-button{background:#fff;color:#a1284b;border:1px solid rgba(226,85,123,.28);box-shadow:none}.hb-actions-inline{display:flex;gap:8px;flex-wrap:wrap}.hb-route-grid{display:grid;grid-template-columns:minmax(340px,.8fr) 1.2fr;gap:18px}@media(max-width:900px){.hb-route-grid{grid-template-columns:1fr}}</style>
 </head>
 <body>
-  <nav class="hb-nav">
-    <div class="hb-nav-inner">
-      <a class="hb-brand" href="index.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Hello Balloons</span></a>
-      <div class="hb-nav-links">
-        <a href="index.html">Inicio</a>
-        <a href="cotizador.html">Cotizador</a>
-        <a href="inventario-app.html">Inventario</a>
-        <a class="active" href="rutas.html">Rutas</a>
-        <a href="admin.html">Admin</a>
-      </div>
-    </div>
-  </nav>
-
-  <main class="hb-section">
-    <div class="hb-container">
-      <div class="hb-section-header">
-        <div>
-          <div class="hb-eyebrow">Planificación diaria</div>
-          <h2>Rutas y horarios</h2>
-          <p class="hb-muted">Pega el link de Google Maps de cada evento. El sistema intenta leer la ubicación, ordenar por hora y detectar riesgos de atraso.</p>
-        </div>
-        <button class="hb-button primary" id="calculateRoute">Resolver y calcular ruta</button>
-      </div>
-
-      <div class="hb-grid-2">
-        <section class="hb-card pad">
-          <h3>Agregar parada</h3>
-          <form id="stopForm" class="hb-form">
-            <div class="hb-inline">
-              <div class="hb-field">
-                <label>Evento</label>
-                <input id="stopName" placeholder="Baby shower / cumpleaños..." />
-              </div>
-              <div class="hb-field">
-                <label>Tipo</label>
-                <select id="stopType">
-                  <option value="setup">Montaje</option>
-                  <option value="teardown">Desmontaje</option>
-                  <option value="delivery">Entrega</option>
-                  <option value="pickup">Recoger</option>
-                </select>
-              </div>
-            </div>
-            <div class="hb-inline">
-              <div class="hb-field">
-                <label>Hora límite de llegada</label>
-                <input id="arrivalTime" type="time" value="09:00" />
-              </div>
-              <div class="hb-field">
-                <label>Duración del servicio (min)</label>
-                <input id="serviceMinutes" type="number" value="90" min="10" step="10" />
-              </div>
-            </div>
-            <div class="hb-field">
-              <label>Ubicación / Google Maps</label>
-              <textarea id="stopMapsInput" placeholder="Pega aquí el link compartido de Google Maps, enlace largo, dirección o coordenadas visibles."></textarea>
-              <small class="hb-muted">No hace falta copiar latitud y longitud por separado.</small>
-            </div>
-            <div class="hb-field">
-              <label>Notas</label>
-              <textarea id="stopNotes" placeholder="Carga pesada, acceso difícil, llevar panel..."></textarea>
-            </div>
-            <button class="hb-button secondary" type="submit">Agregar parada</button>
-          </form>
-        </section>
-
-        <aside class="hb-card pad">
-          <h3>Resumen del día</h3>
-          <div class="hb-grid-2" style="margin-top:14px">
-            <div class="hb-kpi"><span>Paradas</span><strong id="stopsCount">0</strong></div>
-            <div class="hb-kpi"><span>Distancia aprox.</span><strong id="distanceTotal">0 km</strong></div>
-            <div class="hb-kpi"><span>Tiempo viaje</span><strong id="travelTotal">0 min</strong></div>
-            <div class="hb-kpi"><span>Riesgo</span><strong id="riskTotal">Pendiente</strong></div>
-          </div>
-          <div id="routeAdvice" class="hb-alert info" style="margin-top:18px">Agrega paradas y calcula una ruta inicial.</div>
-          <div class="hb-alert warn" style="margin-top:18px">Los links cortos de Google Maps se resuelven mejor con Supabase Function. Si aún no está desplegada, usa enlace largo o coordenadas visibles.</div>
-        </aside>
-      </div>
-
-      <section class="hb-section">
-        <div class="hb-table-wrap">
-          <table class="hb-table">
-            <thead>
-              <tr>
-                <th>Orden</th>
-                <th>Evento</th>
-                <th>Ubicación</th>
-                <th>Tipo</th>
-                <th>Hora límite</th>
-                <th>Servicio</th>
-                <th>Viaje desde anterior</th>
-                <th>Riesgo</th>
-                <th>Notas</th>
-              </tr>
-            </thead>
-            <tbody id="routeTable"></tbody>
-          </table>
-        </div>
-      </section>
-    </div>
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase-config.js"></script>
-  <script src="assets/js/hb-core.js"></script>
+  <nav class="hb-nav"><div class="hb-nav-inner"><a class="hb-brand" href="dashboard.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Dashboard</span></a><div class="hb-nav-links"><a href="dashboard.html">Inicio</a><a href="analytics.html">Analytics</a><a href="admin-galeria.html">Galería</a><a href="inventario-app.html">Inventario</a><a class="active" href="rutas.html">Rutas</a><a href="cotizador.html">Cotizador</a><a href="memoria-eventos.html">Memoria</a><a href="index.html">Web pública</a></div></div></nav>
+  <main class="hb-section"><div class="hb-container">
+    <div class="hb-section-header"><div><div class="hb-eyebrow">Planificación diaria</div><h2>Rutas y horarios</h2><p class="hb-muted">Planifica paradas, ve el mapa, edita, borra y exporta la ruta del día.</p></div><div class="hb-actions" style="margin-top:0"><button class="hb-button primary" id="calculateRoute">Calcular ruta</button><button class="hb-button secondary" id="exportRoute">Exportar Excel</button></div></div>
+    <div class="hb-route-grid"><section class="hb-card pad"><h3 id="formTitle">Agregar parada</h3><form id="stopForm" class="hb-form"><input id="editIndex" type="hidden" /><div class="hb-inline"><div class="hb-field"><label>Evento</label><input id="stopName" placeholder="Baby shower / cumpleaños..." /></div><div class="hb-field"><label>Tipo</label><select id="stopType"><option value="setup">Montaje</option><option value="teardown">Desmontaje</option><option value="delivery">Entrega</option><option value="pickup">Recoger</option></select></div></div><div class="hb-inline"><div class="hb-field"><label>Hora límite</label><input id="arrivalTime" type="time" value="09:00" /></div><div class="hb-field"><label>Servicio (min)</label><input id="serviceMinutes" type="number" value="90" min="10" step="10" /></div></div><div class="hb-field"><label>Ubicación / Google Maps</label><textarea id="stopMapsInput" placeholder="Link de Google Maps, dirección o coordenadas visibles."></textarea></div><div class="hb-field"><label>Notas</label><textarea id="stopNotes" placeholder="Carga pesada, acceso difícil, llevar panel..."></textarea></div><div class="hb-actions"><button class="hb-button primary" type="submit">Guardar parada</button><button id="clearForm" class="hb-button secondary" type="button">Limpiar</button></div></form></section><aside class="hb-card pad"><h3>Resumen del día</h3><div class="hb-grid-2" style="margin-top:14px"><div class="hb-kpi"><span>Paradas</span><strong id="stopsCount">0</strong></div><div class="hb-kpi"><span>Distancia aprox.</span><strong id="distanceTotal">0 km</strong></div><div class="hb-kpi"><span>Tiempo viaje</span><strong id="travelTotal">0 min</strong></div><div class="hb-kpi"><span>Riesgo</span><strong id="riskTotal">Pendiente</strong></div></div><div id="routeAdvice" class="hb-alert info" style="margin-top:18px">Agrega paradas y calcula una ruta inicial.</div></aside></div>
+    <section class="hb-section"><div id="routeMap"></div></section>
+    <section class="hb-section"><div class="hb-table-wrap"><table class="hb-table"><thead><tr><th>Orden</th><th>Evento</th><th>Ubicación</th><th>Tipo</th><th>Hora</th><th>Servicio</th><th>Viaje</th><th>Riesgo</th><th>Notas</th><th>Acciones</th></tr></thead><tbody id="routeTable"></tbody></table></div></section>
+  </div></main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="assets/js/supabase-config.js?v=routes-edit"></script><script src="assets/js/hb-core.js?v=routes-edit"></script>
   <script>
-    const base = window.HB.baseLocation();
-    let stops = [
-      { name: 'Cumpleaños zona norte', type: 'setup', arrivalTime: '09:00', serviceMinutes: 120, mapsInput: '-17.7602, -63.1750', latitude: -17.7602, longitude: -63.1750, locationStatus: 'ok', notes: 'Montaje mediano' },
-      { name: 'Baby shower Equipetrol', type: 'setup', arrivalTime: '12:30', serviceMinutes: 90, mapsInput: '-17.7699, -63.2034', latitude: -17.7699, longitude: -63.2034, locationStatus: 'ok', notes: 'Llevar panel blanco' }
-    ];
-
-    function minutesFromHHMM(value) {
-      const [h, m] = String(value || '00:00').split(':').map(Number);
-      return h * 60 + m;
-    }
-
-    function validCoords(stop) {
-      return Number.isFinite(Number(stop.latitude)) && Number.isFinite(Number(stop.longitude)) && Math.abs(Number(stop.latitude)) <= 90 && Math.abs(Number(stop.longitude)) <= 180;
-    }
-
-    function estimateTravel(origin, destination) {
-      if (!validCoords(origin) || !validCoords(destination)) return { km: 0, minutes: 0, unresolved: true };
-      const km = window.HB.haversineKm(origin, destination) * 1.25;
-      const minutes = Math.max(10, Math.round((km / 25) * 60));
-      return { km: Number(km.toFixed(2)), minutes };
-    }
-
-    async function resolveStopLocation(stop) {
-      if (validCoords(stop)) return stop;
-      const parsed = window.HB.parseMapsInput(stop.mapsInput || '');
-
-      if (!parsed) {
-        return { ...stop, locationStatus: 'sin_ubicacion' };
-      }
-
-      if (parsed.latitude && parsed.longitude) {
-        return { ...stop, latitude: parsed.latitude, longitude: parsed.longitude, locationStatus: 'ok' };
-      }
-
-      if ((parsed.needsServerResolve || parsed.addressText) && window.HB.isConfigured()) {
-        try {
-          const payload = parsed.needsServerResolve
-            ? { mapsUrl: parsed.mapsUrl, loadType: 'medium', useGoogleRoutes: true }
-            : { addressText: parsed.addressText, loadType: 'medium', useGoogleRoutes: true };
-          const remote = await window.HB.invoke('transport-estimate', payload);
-          if (remote.destination?.latitude && remote.destination?.longitude) {
-            return {
-              ...stop,
-              latitude: Number(remote.destination.latitude),
-              longitude: Number(remote.destination.longitude),
-              mapsInput: remote.destination.mapsUrl || stop.mapsInput,
-              locationStatus: 'ok'
-            };
-          }
-        } catch (error) {
-          return { ...stop, locationStatus: 'no_resuelto', locationError: error.message };
-        }
-      }
-
-      return { ...stop, locationStatus: parsed.needsServerResolve ? 'requiere_funcion' : 'direccion_sin_coordenadas' };
-    }
-
-    async function resolveAllStops() {
-      const resolved = [];
-      for (const stop of stops) {
-        resolved.push(await resolveStopLocation(stop));
-      }
-      stops = resolved;
-    }
-
-    function locationLabel(stop) {
-      if (validCoords(stop)) return `${Number(stop.latitude).toFixed(5)}, ${Number(stop.longitude).toFixed(5)}`;
-      if (stop.locationStatus === 'requiere_funcion') return 'Link corto: requiere función';
-      if (stop.locationStatus === 'direccion_sin_coordenadas') return 'Dirección sin coordenadas';
-      if (stop.locationError) return stop.locationError;
-      return 'Sin resolver';
-    }
-
-    function render(calculated = false) {
-      const sorted = [...stops].sort((a, b) => minutesFromHHMM(a.arrivalTime) - minutesFromHHMM(b.arrivalTime));
-      let previous = { ...base, latitude: Number(base.latitude), longitude: Number(base.longitude) };
-      let currentTime = null;
-      let totalKm = 0;
-      let totalMinutes = 0;
-      let redCount = 0;
-      let yellowCount = 0;
-      let unresolvedCount = 0;
-
-      const rows = sorted.map((stop, index) => {
-        const travel = calculated ? estimateTravel(previous, stop) : { km: 0, minutes: 0 };
-        if (travel.unresolved) unresolvedCount++;
-        totalKm += travel.km;
-        totalMinutes += travel.minutes;
-        const arrivalLimit = minutesFromHHMM(stop.arrivalTime);
-        if (currentTime === null) currentTime = Math.max(0, arrivalLimit - travel.minutes);
-        else currentTime += travel.minutes;
-        const slack = arrivalLimit - currentTime;
-        const risk = !calculated ? 'pending' : travel.unresolved ? 'amarillo' : slack < 0 ? 'rojo' : slack < 25 ? 'amarillo' : 'verde';
-        if (risk === 'rojo') redCount++;
-        if (risk === 'amarillo') yellowCount++;
-        const serviceEnd = Math.max(currentTime, arrivalLimit) + Number(stop.serviceMinutes || 0);
-        currentTime = serviceEnd;
-        if (validCoords(stop)) previous = stop;
-        return `
-          <tr>
-            <td>${index + 1}</td>
-            <td><strong>${window.HB.escapeHtml(stop.name)}</strong></td>
-            <td>${window.HB.escapeHtml(locationLabel(stop))}</td>
-            <td>${window.HB.escapeHtml(stop.type)}</td>
-            <td>${window.HB.escapeHtml(stop.arrivalTime)}</td>
-            <td>${stop.serviceMinutes} min</td>
-            <td>${calculated ? (travel.unresolved ? 'Sin ubicación' : `${travel.km} km / ${travel.minutes} min`) : '-'}</td>
-            <td><span class="hb-status ${risk}">${risk}</span></td>
-            <td>${window.HB.escapeHtml(stop.notes || '')}</td>
-          </tr>
-        `;
-      });
-
-      document.getElementById('routeTable').innerHTML = rows.join('');
-      document.getElementById('stopsCount').textContent = stops.length;
-      document.getElementById('distanceTotal').textContent = `${totalKm.toFixed(1)} km`;
-      document.getElementById('travelTotal').textContent = `${totalMinutes} min`;
-      const riskLabel = redCount ? 'Rojo' : yellowCount ? 'Amarillo' : calculated ? 'Verde' : 'Pendiente';
-      document.getElementById('riskTotal').textContent = riskLabel;
-      const advice = unresolvedCount
-        ? 'Hay paradas sin ubicación resuelta. Pega enlace largo, coordenadas visibles o despliega la función para resolver links cortos.'
-        : redCount
-          ? 'Hay al menos una parada con riesgo de atraso. Conviene adelantar montaje, agregar ayudante o separar equipo.'
-          : yellowCount
-            ? 'La ruta es posible, pero con poco margen. Revisar carga, tráfico y tiempo de desmontaje.'
-            : calculated
-              ? 'Ruta inicial viable con los horarios cargados.'
-              : 'Agrega paradas y calcula una ruta inicial.';
-      document.getElementById('routeAdvice').className = `hb-alert ${redCount ? 'danger' : (yellowCount || unresolvedCount) ? 'warn' : 'info'}`;
-      document.getElementById('routeAdvice').textContent = advice;
-    }
-
-    document.getElementById('stopForm').addEventListener('submit', (event) => {
-      event.preventDefault();
-      const mapsInput = document.getElementById('stopMapsInput').value.trim();
-      const parsed = window.HB.parseMapsInput(mapsInput);
-      stops.push({
-        name: document.getElementById('stopName').value.trim() || 'Evento sin nombre',
-        type: document.getElementById('stopType').value,
-        arrivalTime: document.getElementById('arrivalTime').value || '09:00',
-        serviceMinutes: Number(document.getElementById('serviceMinutes').value || 60),
-        mapsInput,
-        latitude: parsed?.latitude,
-        longitude: parsed?.longitude,
-        locationStatus: parsed?.latitude ? 'ok' : parsed?.needsServerResolve ? 'requiere_funcion' : 'pendiente',
-        notes: document.getElementById('stopNotes').value.trim()
-      });
-      event.target.reset();
-      render(false);
-    });
-
-    document.getElementById('calculateRoute').addEventListener('click', async () => {
-      document.getElementById('routeAdvice').className = 'hb-alert info';
-      document.getElementById('routeAdvice').textContent = 'Resolviendo ubicaciones y calculando ruta...';
-      await resolveAllStops();
-      render(true);
-    });
-
-    render(false);
+    const base=window.HB.baseLocation();let stops=[{name:'Cumpleaños zona norte',type:'setup',arrivalTime:'09:00',serviceMinutes:120,mapsInput:'-17.7602, -63.1750',latitude:-17.7602,longitude:-63.1750,locationStatus:'ok',notes:'Montaje mediano'},{name:'Baby shower Equipetrol',type:'setup',arrivalTime:'12:30',serviceMinutes:90,mapsInput:'-17.7699, -63.2034',latitude:-17.7699,longitude:-63.2034,locationStatus:'ok',notes:'Llevar panel blanco'}];let map,markersLayer,lineLayer,lastCalculated=false;
+    function minutesFromHHMM(v){const [h,m]=String(v||'00:00').split(':').map(Number);return h*60+m}function validCoords(s){return Number.isFinite(Number(s.latitude))&&Number.isFinite(Number(s.longitude))&&Math.abs(Number(s.latitude))<=90&&Math.abs(Number(s.longitude))<=180}function estimateTravel(o,d){if(!validCoords(o)||!validCoords(d))return{km:0,minutes:0,unresolved:true};const km=window.HB.haversineKm(o,d)*1.25;return{km:Number(km.toFixed(2)),minutes:Math.max(10,Math.round((km/25)*60))}}
+    function initMap(){if(map||!window.L)return;map=L.map('routeMap').setView([base.latitude,base.longitude],11);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap'}).addTo(map);markersLayer=L.layerGroup().addTo(map);lineLayer=L.layerGroup().addTo(map)}
+    async function resolveStopLocation(stop){if(validCoords(stop))return stop;const p=window.HB.parseMapsInput(stop.mapsInput||'');if(p?.latitude)return{...stop,latitude:p.latitude,longitude:p.longitude,locationStatus:'ok'};return{...stop,locationStatus:p?.needsServerResolve?'requiere_funcion':'direccion_sin_coordenadas'}}async function resolveAllStops(){const resolved=[];for(const s of stops)resolved.push(await resolveStopLocation(s));stops=resolved}
+    function locationLabel(s){return validCoords(s)?`${Number(s.latitude).toFixed(5)}, ${Number(s.longitude).toFixed(5)}`:s.locationStatus==='requiere_funcion'?'Link corto: requiere función':s.locationStatus==='direccion_sin_coordenadas'?'Dirección sin coordenadas':'Sin resolver'}
+    function sortedStops(){return stops.map((s,i)=>({...s,_index:i})).sort((a,b)=>minutesFromHHMM(a.arrivalTime)-minutesFromHHMM(b.arrivalTime))}
+    function renderMap(sorted){initMap();markersLayer.clearLayers();lineLayer.clearLayers();const pts=[];L.marker([base.latitude,base.longitude]).addTo(markersLayer).bindPopup('<strong>Base Hello Balloons</strong>');pts.push([base.latitude,base.longitude]);sorted.forEach((s,i)=>{if(!validCoords(s))return;const p=[Number(s.latitude),Number(s.longitude)];pts.push(p);L.marker(p).addTo(markersLayer).bindPopup(`<strong>${i+1}. ${window.HB.escapeHtml(s.name)}</strong><br>${window.HB.escapeHtml(s.arrivalTime)} · ${window.HB.escapeHtml(s.type)}`)});if(pts.length>1){L.polyline(pts,{weight:4}).addTo(lineLayer);map.fitBounds(pts,{padding:[30,30]})}setTimeout(()=>map.invalidateSize(),150)}
+    function render(calculated=false){lastCalculated=calculated;const sorted=sortedStops();let previous={...base,latitude:Number(base.latitude),longitude:Number(base.longitude)},currentTime=null,totalKm=0,totalMinutes=0,red=0,yellow=0,unresolved=0;const rows=sorted.map((stop,index)=>{const travel=calculated?estimateTravel(previous,stop):{km:0,minutes:0};if(travel.unresolved)unresolved++;totalKm+=travel.km;totalMinutes+=travel.minutes;const limit=minutesFromHHMM(stop.arrivalTime);if(currentTime===null)currentTime=Math.max(0,limit-travel.minutes);else currentTime+=travel.minutes;const slack=limit-currentTime;const risk=!calculated?'pending':travel.unresolved?'amarillo':slack<0?'rojo':slack<25?'amarillo':'verde';if(risk==='rojo')red++;if(risk==='amarillo')yellow++;currentTime=Math.max(currentTime,limit)+Number(stop.serviceMinutes||0);if(validCoords(stop))previous=stop;return `<tr><td>${index+1}</td><td><strong>${window.HB.escapeHtml(stop.name)}</strong></td><td>${window.HB.escapeHtml(locationLabel(stop))}</td><td>${window.HB.escapeHtml(stop.type)}</td><td>${window.HB.escapeHtml(stop.arrivalTime)}</td><td>${stop.serviceMinutes} min</td><td>${calculated?(travel.unresolved?'Sin ubicación':`${travel.km} km / ${travel.minutes} min`):'-'}</td><td><span class="hb-status ${risk}">${risk}</span></td><td>${window.HB.escapeHtml(stop.notes||'')}</td><td><div class="hb-actions-inline"><button class="hb-button secondary" data-edit-stop="${stop._index}">Editar</button><button class="hb-button hb-danger-button" data-delete-stop="${stop._index}">Borrar</button></div></td></tr>`}).join('');document.getElementById('routeTable').innerHTML=rows;document.getElementById('stopsCount').textContent=stops.length;document.getElementById('distanceTotal').textContent=`${totalKm.toFixed(1)} km`;document.getElementById('travelTotal').textContent=`${totalMinutes} min`;document.getElementById('riskTotal').textContent=red?'Rojo':yellow?'Amarillo':calculated?'Verde':'Pendiente';const advice=unresolved?'Hay paradas sin ubicación resuelta.':red?'Hay riesgo de atraso. Conviene adelantar horario o separar equipo.':yellow?'Ruta posible, pero con poco margen.':calculated?'Ruta inicial viable.':'Agrega paradas y calcula una ruta inicial.';document.getElementById('routeAdvice').className=`hb-alert ${red?'danger':(yellow||unresolved)?'warn':'info'}`;document.getElementById('routeAdvice').textContent=advice;renderMap(sorted)}
+    function clearForm(){document.getElementById('stopForm').reset();document.getElementById('editIndex').value='';document.getElementById('arrivalTime').value='09:00';document.getElementById('serviceMinutes').value='90';document.getElementById('formTitle').textContent='Agregar parada'}
+    function editStop(i){const s=stops[Number(i)];if(!s)return;document.getElementById('editIndex').value=i;document.getElementById('stopName').value=s.name||'';document.getElementById('stopType').value=s.type||'setup';document.getElementById('arrivalTime').value=s.arrivalTime||'09:00';document.getElementById('serviceMinutes').value=s.serviceMinutes||90;document.getElementById('stopMapsInput').value=s.mapsInput||locationLabel(s);document.getElementById('stopNotes').value=s.notes||'';document.getElementById('formTitle').textContent='Editar parada'}
+    function deleteStop(i){if(!confirm('¿Borrar esta parada?'))return;stops.splice(Number(i),1);render(lastCalculated)}
+    function exportCsv(){const rows=sortedStops();const h=['orden','evento','tipo','hora_limite','servicio_min','ubicacion','latitud','longitud','notas'];const csv=[h.join(',')].concat(rows.map((s,i)=>[i+1,s.name,s.type,s.arrivalTime,s.serviceMinutes,locationLabel(s),s.latitude,s.longitude,s.notes].map(v=>`"${String(v||'').replaceAll('"','""')}"`).join(','))).join('\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`hello-balloons-rutas-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(a.href)}
+    document.getElementById('stopForm').addEventListener('submit',e=>{e.preventDefault();const mapsInput=document.getElementById('stopMapsInput').value.trim();const p=window.HB.parseMapsInput(mapsInput);const item={name:document.getElementById('stopName').value.trim()||'Evento sin nombre',type:document.getElementById('stopType').value,arrivalTime:document.getElementById('arrivalTime').value||'09:00',serviceMinutes:Number(document.getElementById('serviceMinutes').value||60),mapsInput,latitude:p?.latitude,longitude:p?.longitude,locationStatus:p?.latitude?'ok':p?.needsServerResolve?'requiere_funcion':'pendiente',notes:document.getElementById('stopNotes').value.trim()};const idx=document.getElementById('editIndex').value;if(idx!=='')stops[Number(idx)]=item;else stops.push(item);clearForm();render(false)});
+    document.addEventListener('click',e=>{const ed=e.target.closest('[data-edit-stop]'),del=e.target.closest('[data-delete-stop]');if(ed)editStop(ed.dataset.editStop);if(del)deleteStop(del.dataset.deleteStop)});document.getElementById('calculateRoute').addEventListener('click',async()=>{document.getElementById('routeAdvice').className='hb-alert info';document.getElementById('routeAdvice').textContent='Resolviendo ubicaciones y calculando ruta...';await resolveAllStops();render(true)});document.getElementById('clearForm').addEventListener('click',clearForm);document.getElementById('exportRoute').addEventListener('click',exportCsv);render(false);
   </script>
 </body>
 </html>
