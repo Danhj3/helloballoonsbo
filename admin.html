@@ -3,409 +3,183 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin - Hello Balloons</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <title>Pedidos | Hello Balloons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hb-app.css" />
+  <link rel="stylesheet" href="assets/css/hb-public.css" />
   <style>
-    :root {
-      --hb-pink: #E2557B;
-      --hb-teal: #0CA494;
-      --hb-yellow: #D6D234;
-      --hb-ink: #263238;
-      --hb-soft: #fff8fb;
-    }
-
-    body {
-      min-height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      color: var(--hb-ink);
-      background-color: #f6f7f8;
-    }
-
-    .navbar {
-      background-color: var(--hb-pink);
-    }
-
-    .navbar-brand,
-    .navbar-nav .nav-link {
-      color: white !important;
-    }
-
-    .page-wrap {
-      padding: 36px 0;
-    }
-
-    .panel {
-      border: 1px solid #eceff1;
-      border-radius: 8px;
-      background: white;
-      box-shadow: 0 8px 18px rgba(38, 50, 56, 0.06);
-    }
-
-    .panel-body {
-      padding: 22px;
-    }
-
-    .btn-hb {
-      background-color: var(--hb-teal);
-      border-color: var(--hb-teal);
-      color: #fff;
-      font-weight: 700;
-    }
-
-    .btn-hb:hover,
-    .btn-hb:focus {
-      background-color: #087c72;
-      border-color: #087c72;
-      color: #fff;
-    }
-
-    .admin-grid {
-      display: grid;
-      grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.1fr);
-      gap: 20px;
-      align-items: start;
-    }
-
-    .table-responsive {
-      max-height: 560px;
-      overflow: auto;
-    }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 9px;
-      border-radius: 999px;
-      background: #eef9f7;
-      color: #087c72;
-      font-size: 0.82rem;
-      font-weight: 700;
-    }
-
-    .setup-note {
-      border-left: 4px solid var(--hb-yellow);
-      background: #fffce5;
-      color: #5d5612;
-      padding: 12px 14px;
-      border-radius: 6px;
-    }
-
-    @media (max-width: 992px) {
-      .admin-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    .hb-danger-button{background:#fff;color:#a1284b;border:1px solid rgba(226,85,123,.28);box-shadow:none}.hb-danger-button:hover{background:#fff6f8}.hb-order-card{display:grid;gap:12px}.hb-order-meta{display:flex;gap:10px;flex-wrap:wrap}.hb-order-meta span{background:#f7f9fa;border:1px solid var(--hb-line);border-radius:999px;padding:8px 10px;font-size:.86rem;font-weight:800;color:var(--hb-muted)}.hb-order-actions{display:flex;gap:10px;flex-wrap:wrap}.hb-order-actions select{border:1px solid #dfe5e8;border-radius:999px;padding:10px 12px;font:inherit;background:#fff}
   </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html">Hello Balloons</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Abrir menu">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="index.html#servicios">Servicios</a></li>
-          <li class="nav-item"><a class="nav-link" href="pedidos.html">Pedidos</a></li>
-          <li class="nav-item"><a class="nav-link active" href="admin.html">Admin</a></li>
-        </ul>
+  <nav class="hb-nav">
+    <div class="hb-nav-inner">
+      <a class="hb-brand" href="dashboard.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Dashboard</span></a>
+      <div class="hb-nav-links">
+        <a href="dashboard.html">Inicio</a>
+        <a class="active" href="admin.html">Pedidos</a>
+        <a href="admin-galeria.html">Galería</a>
+        <a href="inventario-app.html">Inventario</a>
+        <a href="rutas.html">Rutas</a>
+        <a href="cotizador.html">Cotizador</a>
+        <a href="memoria-eventos.html">Memoria</a>
+        <a href="index.html">Web pública</a>
       </div>
     </div>
   </nav>
 
-  <main class="page-wrap">
-    <div class="container">
-      <div class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center mb-4">
-        <div>
-          <h1 class="fw-bold mb-1">Panel de servicios y pedidos</h1>
-          <p class="text-secondary mb-0">Gestiona precios, servicios disponibles y seguimiento de pedidos.</p>
-        </div>
-        <button id="signOutButton" class="btn btn-outline-secondary d-none" type="button">Cerrar sesion</button>
+  <main class="hb-section">
+    <div class="hb-container">
+      <div id="loginRequired" class="hb-card pad" style="display:none">
+        <h2>Necesitas iniciar sesión</h2>
+        <p class="hb-muted">Esta página es interna.</p>
+        <a class="hb-button pink" href="login.html">Ir al login</a>
       </div>
 
-      <section id="loginPanel" class="panel">
-        <div class="panel-body">
-          <h2 class="h4 fw-bold">Ingreso admin</h2>
-          <div id="loginSetupNote" class="setup-note mb-3 d-none"></div>
-          <form id="loginForm" class="row g-3">
-            <div class="col-md-5">
-              <label class="form-label" for="email">Email</label>
-              <input id="email" class="form-control" type="email" required />
-            </div>
-            <div class="col-md-5">
-              <label class="form-label" for="password">Password</label>
-              <input id="password" class="form-control" type="password" required />
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-              <button class="btn btn-hb w-100" type="submit">Entrar</button>
-            </div>
-          </form>
-          <div id="loginMessage" class="mt-3"></div>
-        </div>
-      </section>
-
-      <section id="adminPanel" class="admin-grid d-none">
-        <div class="panel">
-          <div class="panel-body">
-            <h2 class="h4 fw-bold mb-3">Servicio</h2>
-            <form id="serviceForm" class="row g-3">
-              <input id="serviceId" type="hidden" />
-              <div class="col-12">
-                <label class="form-label" for="serviceName">Nombre</label>
-                <input id="serviceName" class="form-control" required />
-              </div>
-              <div class="col-md-8">
-                <label class="form-label" for="categorySelect">Categoria</label>
-                <select id="categorySelect" class="form-select"></select>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label" for="servicePrice">Precio Bs.</label>
-                <input id="servicePrice" class="form-control" type="number" min="0" step="0.01" required />
-              </div>
-              <div class="col-12">
-                <label class="form-label" for="serviceDescription">Descripcion</label>
-                <textarea id="serviceDescription" class="form-control" rows="3"></textarea>
-              </div>
-              <div class="col-12">
-                <label class="form-label" for="serviceImage">Imagen URL</label>
-                <input id="serviceImage" class="form-control" type="url" placeholder="https://..." />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label" for="displayOrder">Orden</label>
-                <input id="displayOrder" class="form-control" type="number" value="0" />
-              </div>
-              <div class="col-md-4 d-flex align-items-end">
-                <div class="form-check">
-                  <input id="isActive" class="form-check-input" type="checkbox" checked />
-                  <label class="form-check-label" for="isActive">Activo</label>
-                </div>
-              </div>
-              <div class="col-md-4 d-flex align-items-end">
-                <div class="form-check">
-                  <input id="isFeatured" class="form-check-input" type="checkbox" />
-                  <label class="form-check-label" for="isFeatured">Destacado</label>
-                </div>
-              </div>
-              <div class="col-12 d-flex flex-wrap gap-2">
-                <button class="btn btn-hb" type="submit">Guardar servicio</button>
-                <button id="clearServiceButton" class="btn btn-outline-secondary" type="button">Nuevo</button>
-              </div>
-            </form>
-            <div id="serviceMessage" class="mt-3"></div>
+      <div id="ordersPanel" style="display:none">
+        <div class="hb-section-header">
+          <div>
+            <div class="hb-eyebrow">Panel interno</div>
+            <h2>Pedidos recibidos</h2>
+            <p class="hb-muted">Revisa solicitudes de clientes, datos de contacto, ubicación y notas del pedido.</p>
+          </div>
+          <div class="hb-actions" style="margin-top:0">
+            <button id="refreshButton" class="hb-button secondary" type="button">Actualizar</button>
+            <button id="logoutButton" class="hb-button secondary" type="button">Salir</button>
           </div>
         </div>
 
-        <div class="d-grid gap-3">
-          <div class="panel">
-            <div class="panel-body">
-              <div class="d-flex justify-content-between gap-3 align-items-center mb-3">
-                <h2 class="h4 fw-bold mb-0">Servicios cargados</h2>
-                <button id="refreshButton" class="btn btn-outline-secondary btn-sm" type="button">Actualizar</button>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-sm align-middle">
-                  <thead>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Precio</th>
-                      <th>Estado</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody id="servicesTable"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-body">
-              <h2 class="h4 fw-bold mb-3">Pedidos recientes</h2>
-              <div class="table-responsive">
-                <table class="table table-sm align-middle">
-                  <thead>
-                    <tr>
-                      <th>Pedido</th>
-                      <th>Cliente</th>
-                      <th>Fecha</th>
-                      <th>Total</th>
-                      <th>Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody id="ordersTable"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        <div id="message" class="hb-alert info" style="display:none;margin-bottom:18px"></div>
+        <div id="ordersGrid" class="hb-grid-2"></div>
+      </div>
     </div>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase-config.js"></script>
-  <script src="assets/js/hello-supabase.js"></script>
+  <script src="assets/js/supabase-config.js?v=nav3"></script>
+  <script src="assets/js/hb-core.js?v=nav3"></script>
   <script>
-    let adminServices = [];
-
-    function adminMessage(target, kind, text) {
-      document.getElementById(target).innerHTML = `<div class="alert alert-${kind}" role="alert">${window.HelloBalloonsData.escapeHtml(text)}</div>`;
+    function showMessage(text, kind = 'info') {
+      const box = document.getElementById('message');
+      box.className = `hb-alert ${kind}`;
+      box.textContent = text;
+      box.style.display = 'block';
     }
 
-    function resetServiceForm() {
-      document.getElementById("serviceId").value = "";
-      document.getElementById("serviceName").value = "";
-      document.getElementById("servicePrice").value = "";
-      document.getElementById("serviceDescription").value = "";
-      document.getElementById("serviceImage").value = "";
-      document.getElementById("displayOrder").value = "0";
-      document.getElementById("isActive").checked = true;
-      document.getElementById("isFeatured").checked = false;
+    function statusLabel(status) {
+      const labels = { new: 'Nuevo', contacted: 'Contactado', quoted: 'Cotizado', confirmed: 'Confirmado', completed: 'Completado', cancelled: 'Cancelado' };
+      return labels[status] || status || 'Nuevo';
     }
 
-    function editService(id) {
-      const service = adminServices.find((item) => String(item.id) === String(id));
-      if (!service) {
-        return;
-      }
-
-      document.getElementById("serviceId").value = service.id;
-      document.getElementById("serviceName").value = service.name || "";
-      document.getElementById("categorySelect").value = service.category_id || "";
-      document.getElementById("servicePrice").value = service.base_price || 0;
-      document.getElementById("serviceDescription").value = service.description || "";
-      document.getElementById("serviceImage").value = service.image_url || "";
-      document.getElementById("displayOrder").value = service.display_order || 0;
-      document.getElementById("isActive").checked = Boolean(service.is_active);
-      document.getElementById("isFeatured").checked = Boolean(service.is_featured);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    function mapsLink(text) {
+      if (!text) return '';
+      const url = String(text).match(/https?:\/\/[^\s]+/);
+      return url ? url[0] : '';
     }
 
-    function renderServicesTable() {
-      const table = document.getElementById("servicesTable");
-      table.innerHTML = adminServices.map((service) => `
-        <tr>
-          <td>${window.HelloBalloonsData.escapeHtml(service.name)}</td>
-          <td>${window.HelloBalloonsData.formatPrice(service.base_price, service.currency)}</td>
-          <td><span class="status-pill">${service.is_active ? "Activo" : "Oculto"}</span></td>
-          <td class="text-end"><button class="btn btn-outline-secondary btn-sm" type="button" data-service-id="${window.HelloBalloonsData.escapeAttr(service.id)}">Editar</button></td>
-        </tr>
-      `).join("");
-
-      table.querySelectorAll("[data-service-id]").forEach((button) => {
-        button.addEventListener("click", () => editService(button.dataset.serviceId));
-      });
-    }
-
-    function renderOrdersTable(orders) {
-      const table = document.getElementById("ordersTable");
-      if (!orders.length) {
-        table.innerHTML = `<tr><td colspan="5" class="text-secondary">Sin pedidos todavia.</td></tr>`;
-        return;
-      }
-
-      table.innerHTML = orders.map((order) => `
-        <tr>
-          <td>${window.HelloBalloonsData.escapeHtml(order.order_number || order.id)}</td>
-          <td>${window.HelloBalloonsData.escapeHtml(order.client_name)}<br><small class="text-secondary">${window.HelloBalloonsData.escapeHtml(order.client_phone || "")}</small></td>
-          <td>${window.HelloBalloonsData.escapeHtml(order.event_date || "")}</td>
-          <td>${window.HelloBalloonsData.formatPrice(order.total_amount, "BOB")}</td>
-          <td>
-            <select class="form-select form-select-sm" data-order-id="${window.HelloBalloonsData.escapeAttr(order.id)}">
-              ${["new", "quoted", "confirmed", "delivered", "cancelled"].map((status) => `<option value="${status}" ${order.status === status ? "selected" : ""}>${status}</option>`).join("")}
+    function orderCard(order) {
+      const link = mapsLink(order.event_address || order.notes || '');
+      return `
+        <article class="hb-card pad hb-order-card">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+            <div>
+              <h3>${window.HB.escapeHtml(order.order_number || 'Pedido')}</h3>
+              <p class="hb-muted">${window.HB.escapeHtml(order.client_name || 'Sin cliente')} · ${window.HB.escapeHtml(order.client_phone || 'Sin teléfono')}</p>
+            </div>
+            <span class="hb-status ${order.status === 'new' ? 'amarillo' : 'verde'}">${window.HB.escapeHtml(statusLabel(order.status))}</span>
+          </div>
+          <div class="hb-order-meta">
+            <span>${window.HB.escapeHtml(order.event_type || 'Evento')}</span>
+            <span>${window.HB.escapeHtml(order.event_date || 'Sin fecha')}</span>
+            ${order.desired_budget ? `<span>Presupuesto: ${window.HB.money(order.desired_budget)}</span>` : ''}
+          </div>
+          <div>
+            <strong>Ubicación</strong>
+            <p class="hb-muted">${window.HB.escapeHtml(order.event_address || 'No indicada')}</p>
+            ${link ? `<a class="hb-small-link" href="${window.HB.escapeAttr(link)}" target="_blank" rel="noopener">Abrir ubicación</a>` : ''}
+          </div>
+          <div>
+            <strong>Notas</strong>
+            <p class="hb-muted" style="white-space:pre-wrap">${window.HB.escapeHtml(order.notes || 'Sin notas')}</p>
+          </div>
+          <div class="hb-order-actions">
+            <select data-status-id="${order.id}">
+              ${['new','contacted','quoted','confirmed','completed','cancelled'].map(value => `<option value="${value}" ${value === order.status ? 'selected' : ''}>${statusLabel(value)}</option>`).join('')}
             </select>
-          </td>
-        </tr>
-      `).join("");
-
-      table.querySelectorAll("[data-order-id]").forEach((select) => {
-        select.addEventListener("change", async () => {
-          try {
-            await window.HelloBalloonsData.updateOrderStatus(select.dataset.orderId, select.value);
-          } catch (error) {
-            alert(error.message || "No se pudo actualizar el pedido.");
-          }
-        });
-      });
+            <button class="hb-button secondary" data-update-id="${order.id}" type="button">Guardar estado</button>
+            <button class="hb-button hb-danger-button" data-delete-id="${order.id}" type="button">Borrar</button>
+          </div>
+        </article>
+      `;
     }
 
-    async function loadAdminData() {
-      const categoriesResult = await window.HelloBalloonsData.fetchCategories();
-      document.getElementById("categorySelect").innerHTML = categoriesResult.categories.map((category) => `
-        <option value="${window.HelloBalloonsData.escapeAttr(category.id)}">${window.HelloBalloonsData.escapeHtml(category.name)}</option>
-      `).join("");
-
-      adminServices = await window.HelloBalloonsData.fetchAdminServices();
-      renderServicesTable();
-
-      const orders = await window.HelloBalloonsData.fetchOrders();
-      renderOrdersTable(orders);
-    }
-
-    async function showAdmin() {
-      document.getElementById("loginPanel").classList.add("d-none");
-      document.getElementById("adminPanel").classList.remove("d-none");
-      document.getElementById("signOutButton").classList.remove("d-none");
-      await loadAdminData();
-    }
-
-    document.addEventListener("DOMContentLoaded", async () => {
-      if (!window.HelloBalloonsData.isConfigured()) {
-        const note = document.getElementById("loginSetupNote");
-        note.textContent = "Configura assets/js/supabase-config.js y ejecuta supabase/schema.sql antes de usar el panel.";
-        note.classList.remove("d-none");
+    async function loadOrders() {
+      const client = window.HB.client();
+      if (!client) {
+        document.getElementById('ordersGrid').innerHTML = '<div class="hb-alert warn">Conecta Supabase para ver pedidos reales.</div>';
+        return;
       }
+      const { data, error } = await client
+        .from('orders')
+        .select('id, order_number, client_name, client_phone, client_email, event_date, event_type, event_address, desired_budget, notes, status, created_at')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      document.getElementById('ordersGrid').innerHTML = (data || []).length ? data.map(orderCard).join('') : '<div class="hb-alert warn">Todavía no hay pedidos.</div>';
+    }
 
-      const session = await window.HelloBalloonsData.getSession();
-      if (session) {
-        await showAdmin();
+    async function updateOrderStatus(id) {
+      const client = window.HB.client();
+      const status = document.querySelector(`[data-status-id="${id}"]`).value;
+      const { error } = await client.from('orders').update({ status }).eq('id', id);
+      if (error) throw error;
+      showMessage('Estado actualizado.', 'info');
+      await loadOrders();
+    }
+
+    async function deleteOrder(id) {
+      if (!confirm('¿Borrar este pedido? Esta acción no se puede deshacer.')) return;
+      const client = window.HB.client();
+      const { error } = await client.from('orders').delete().eq('id', id);
+      if (error) throw error;
+      showMessage('Pedido borrado.', 'info');
+      await loadOrders();
+    }
+
+    document.addEventListener('click', async (event) => {
+      const updateBtn = event.target.closest('[data-update-id]');
+      const deleteBtn = event.target.closest('[data-delete-id]');
+      try {
+        if (updateBtn) await updateOrderStatus(updateBtn.dataset.updateId);
+        if (deleteBtn) await deleteOrder(deleteBtn.dataset.deleteId);
+      } catch (error) {
+        showMessage(error.message || 'No se pudo realizar la acción.', 'danger');
       }
-
-      document.getElementById("loginForm").addEventListener("submit", async (event) => {
-        event.preventDefault();
-        try {
-          await window.HelloBalloonsData.signIn(
-            document.getElementById("email").value.trim(),
-            document.getElementById("password").value
-          );
-          await showAdmin();
-        } catch (error) {
-          adminMessage("loginMessage", "danger", error.message || "No se pudo iniciar sesion.");
-        }
-      });
-
-      document.getElementById("serviceForm").addEventListener("submit", async (event) => {
-        event.preventDefault();
-        try {
-          await window.HelloBalloonsData.upsertService({
-            id: document.getElementById("serviceId").value || undefined,
-            name: document.getElementById("serviceName").value.trim(),
-            category_id: document.getElementById("categorySelect").value,
-            base_price: document.getElementById("servicePrice").value,
-            description: document.getElementById("serviceDescription").value.trim(),
-            image_url: document.getElementById("serviceImage").value.trim(),
-            display_order: document.getElementById("displayOrder").value,
-            is_active: document.getElementById("isActive").checked,
-            is_featured: document.getElementById("isFeatured").checked
-          });
-          adminMessage("serviceMessage", "success", "Servicio guardado.");
-          resetServiceForm();
-          await loadAdminData();
-        } catch (error) {
-          adminMessage("serviceMessage", "danger", error.message || "No se pudo guardar el servicio.");
-        }
-      });
-
-      document.getElementById("clearServiceButton").addEventListener("click", resetServiceForm);
-      document.getElementById("refreshButton").addEventListener("click", loadAdminData);
-      document.getElementById("signOutButton").addEventListener("click", async () => {
-        await window.HelloBalloonsData.signOut();
-        window.location.reload();
-      });
     });
+
+    async function init() {
+      if (!window.HB.isConfigured()) {
+        document.getElementById('loginRequired').style.display = 'none';
+        document.getElementById('ordersPanel').style.display = 'block';
+        await loadOrders();
+        return;
+      }
+      const session = await window.HB.getSession();
+      if (!session) {
+        document.getElementById('loginRequired').style.display = 'block';
+        document.getElementById('ordersPanel').style.display = 'none';
+        return;
+      }
+      document.getElementById('loginRequired').style.display = 'none';
+      document.getElementById('ordersPanel').style.display = 'block';
+      await loadOrders();
+    }
+
+    document.getElementById('refreshButton').addEventListener('click', loadOrders);
+    document.getElementById('logoutButton').addEventListener('click', async () => { await window.HB.signOut(); window.location.href = 'login.html'; });
+    init();
   </script>
 </body>
 </html>
