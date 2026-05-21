@@ -22,7 +22,7 @@ window.HELLO_BALLOONS_BASE_LOCATION = {
   ];
 
   const items = [
-    { href: "dashboard.html", label: "Inicio" },
+    { href: "dashboard.html", label: "Analytics" },
     { href: "admin-galeria.html", label: "Galería" },
     { href: "inventario-app.html", label: "Inventario" },
     { href: "rutas.html", label: "Rutas" },
