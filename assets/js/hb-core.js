@@ -157,13 +157,7 @@
         : marginPercent >= 0.35
           ? "amarillo"
           : "rojo";
-    return {
-      totalCost,
-      minimumPrice,
-      expectedProfit,
-      marginPercent,
-      status
-    };
+    return { totalCost, minimumPrice, expectedProfit, marginPercent, status };
   };
 
   HB.signIn = async function signIn(email, password) {
@@ -196,33 +190,9 @@
 
   HB.fetchServices = async function fetchServices() {
     const fallback = [
-      {
-        id: "decoracion-media",
-        name: "Decoracion tematica media",
-        description: "Panel, mesa, cilindros, globos y detalles personalizados.",
-        base_price: 1250,
-        currency: "BOB",
-        image_url: HB.brand.heroImage,
-        is_featured: true
-      },
-      {
-        id: "arco-organico",
-        name: "Arco organico de globos",
-        description: "Arco para ingreso, mesa principal o backdrop con paleta personalizada.",
-        base_price: 450,
-        currency: "BOB",
-        image_url: HB.brand.heroImage,
-        is_featured: true
-      },
-      {
-        id: "bouquet-globos",
-        name: "Bouquet de globos",
-        description: "Detalle personalizado con globos, colores y mensaje.",
-        base_price: 180,
-        currency: "BOB",
-        image_url: HB.brand.heroImage,
-        is_featured: false
-      }
+      { id: "decoracion-media", name: "Decoracion tematica media", description: "Panel, mesa, cilindros, globos y detalles personalizados.", base_price: 1250, currency: "BOB", image_url: HB.brand.heroImage, is_featured: true },
+      { id: "arco-organico", name: "Arco organico de globos", description: "Arco para ingreso, mesa principal o backdrop con paleta personalizada.", base_price: 450, currency: "BOB", image_url: HB.brand.heroImage, is_featured: true },
+      { id: "bouquet-globos", name: "Bouquet de globos", description: "Detalle personalizado con globos, colores y mensaje.", base_price: 180, currency: "BOB", image_url: HB.brand.heroImage, is_featured: false }
     ];
 
     const client = HB.client();
@@ -265,6 +235,7 @@
     const current = window.location.pathname.split('/').pop() || 'dashboard.html';
     const internalPages = [
       'dashboard.html',
+      'agenda.html',
       'analytics.html',
       'admin-galeria.html',
       'inventario-app.html',
@@ -280,6 +251,7 @@
 
     const items = [
       { href: 'dashboard.html', label: 'Inicio' },
+      { href: 'agenda.html', label: 'Agenda' },
       { href: 'analytics.html', label: 'Analytics' },
       { href: 'admin-galeria.html', label: 'Galería' },
       { href: 'inventario-app.html', label: 'Inventario' },
