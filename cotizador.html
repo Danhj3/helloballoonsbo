@@ -29,7 +29,7 @@
         <div>
           <div class="hb-eyebrow">Prototipo operativo</div>
           <h2>Cotizador rentable</h2>
-          <p class="hb-muted">Calcula costos, transporte aproximado desde El Palmar, precio mínimo y semáforo de margen.</p>
+          <p class="hb-muted">Pega el link compartido de Google Maps del cliente. El sistema intenta extraer la ubicación y calcular transporte desde El Palmar.</p>
         </div>
       </div>
 
@@ -43,7 +43,7 @@
               </div>
               <div class="hb-field">
                 <label>WhatsApp</label>
-                <input id="clientPhone" placeholder="Ej. 71621501" />
+                <input id="clientPhone" placeholder="Número del cliente" />
               </div>
             </div>
 
@@ -66,15 +66,10 @@
               </div>
             </div>
 
-            <div class="hb-inline">
-              <div class="hb-field">
-                <label>Latitud destino</label>
-                <input id="destLat" type="number" step="0.000001" placeholder="-17.7833" />
-              </div>
-              <div class="hb-field">
-                <label>Longitud destino</label>
-                <input id="destLng" type="number" step="0.000001" placeholder="-63.1821" />
-              </div>
+            <div class="hb-field">
+              <label>Ubicación del evento</label>
+              <textarea id="mapsInput" placeholder="Pega aquí el link compartido de Google Maps, el enlace largo, una dirección o coordenadas visibles."></textarea>
+              <small class="hb-muted">Ejemplos válidos: link de Maps, enlace largo con @lat,lng, o coordenadas como -17.830615, -63.157275.</small>
             </div>
 
             <div class="hb-inline">
@@ -139,9 +134,10 @@
             <div class="hb-kpi"><span>Precio mínimo 50/50</span><strong id="minimumOut">Bs. 0</strong><small class="hb-muted">costo ÷ 0.5</small></div>
             <div class="hb-kpi"><span>Margen</span><strong id="marginOut">0%</strong><small id="profitOut" class="hb-muted">Ganancia Bs. 0</small></div>
           </div>
+          <div id="locationOut" class="hb-alert info" style="margin-top:18px">Pega la ubicación compartida por el cliente.</div>
           <div id="statusOut" class="hb-alert info" style="margin-top:18px">Completa los datos y calcula.</div>
           <div class="hb-alert warn" style="margin-top:18px">
-            Este prototipo calcula localmente si no está desplegada la Edge Function. Cuando Supabase Functions esté activo, el transporte usará `transport-estimate`.
+            Los links cortos tipo maps.app.goo.gl se resuelven mejor desde Supabase Function. Si la función aún no está desplegada, usa un enlace largo de Maps o coordenadas visibles.
           </div>
           <h3 style="margin-top:22px">Mensaje sugerido</h3>
           <div id="messageOut" class="hb-alert info">Aquí aparecerá el mensaje para el cliente.</div>
@@ -158,27 +154,70 @@
 
     function n(id) { return Number(document.getElementById(id).value || 0); }
 
+    function setLocationMessage(text, kind = 'info') {
+      const box = document.getElementById('locationOut');
+      box.className = `hb-alert ${kind}`;
+      box.textContent = text;
+    }
+
+    async function resolveTransportFromInput(mapsInput, loadType) {
+      const parsed = window.HB.parseMapsInput(mapsInput);
+      if (!parsed) {
+        setLocationMessage('Sin ubicación: no se sumó transporte.', 'warn');
+        return { suggestedCost: 0, distanceKmOneWay: 0, roundTripKm: 0, provider: 'sin_destino' };
+      }
+
+      if (parsed.latitude && parsed.longitude) {
+        const destination = { latitude: parsed.latitude, longitude: parsed.longitude, mapsUrl: parsed.originalInput };
+        setLocationMessage(`Ubicación leída: ${parsed.latitude}, ${parsed.longitude}`, 'info');
+        try {
+          if (window.HB.isConfigured()) {
+            const remote = await window.HB.invoke('transport-estimate', { destination, mapsUrl: parsed.originalInput, loadType, useGoogleRoutes: true });
+            const transport = remote.calculation || remote.estimate;
+            return { ...transport, suggestedCost: Number(transport.suggestedCost || remote.estimate?.suggested_cost || 0) };
+          }
+        } catch (error) {
+          setLocationMessage(`Ubicación leída localmente. No se pudo usar función remota: ${error.message}`, 'warn');
+        }
+        return window.HB.transportFallback({ destination, loadType });
+      }
+
+      if (parsed.needsServerResolve && window.HB.isConfigured()) {
+        setLocationMessage('Resolviendo link corto de Google Maps desde Supabase...', 'info');
+        const remote = await window.HB.invoke('transport-estimate', { mapsUrl: parsed.mapsUrl, loadType, useGoogleRoutes: true });
+        const transport = remote.calculation || remote.estimate;
+        if (remote.destination?.latitude && remote.destination?.longitude) {
+          setLocationMessage(`Link resuelto: ${remote.destination.latitude}, ${remote.destination.longitude}`, 'info');
+        }
+        return { ...transport, suggestedCost: Number(transport.suggestedCost || remote.estimate?.suggested_cost || 0) };
+      }
+
+      if (parsed.needsServerResolve) {
+        setLocationMessage('Es un link corto de Google Maps. Para resolverlo automáticamente falta desplegar la función de Supabase; por ahora pega el enlace largo o coordenadas visibles.', 'warn');
+        return { suggestedCost: 0, distanceKmOneWay: 0, roundTripKm: 0, provider: 'link_corto_sin_funcion' };
+      }
+
+      if (parsed.addressText && window.HB.isConfigured()) {
+        setLocationMessage('Intentando calcular por dirección escrita...', 'info');
+        const remote = await window.HB.invoke('transport-estimate', { addressText: parsed.addressText, loadType, useGoogleRoutes: true });
+        const transport = remote.calculation || remote.estimate;
+        return { ...transport, suggestedCost: Number(transport.suggestedCost || remote.estimate?.suggested_cost || 0) };
+      }
+
+      setLocationMessage('Dirección guardada como texto. Para calcular transporte automático usa link de Maps o coordenadas.', 'warn');
+      return { suggestedCost: 0, distanceKmOneWay: 0, roundTripKm: 0, provider: 'direccion_texto' };
+    }
+
     async function calculate(event) {
       event.preventDefault();
-      const destination = {
-        latitude: n('destLat'),
-        longitude: n('destLng')
-      };
+      const mapsInput = document.getElementById('mapsInput').value.trim();
       const loadType = document.getElementById('loadType').value;
       let transport = { suggestedCost: 0, distanceKmOneWay: 0, roundTripKm: 0, provider: 'sin_destino' };
 
-      if (destination.latitude && destination.longitude) {
-        try {
-          if (window.HB.isConfigured()) {
-            const remote = await window.HB.invoke('transport-estimate', { destination, loadType, useGoogleRoutes: true });
-            transport = remote.calculation || remote.estimate || transport;
-            transport.suggestedCost = Number(transport.suggestedCost || remote.estimate?.suggested_cost || 0);
-          } else {
-            transport = window.HB.transportFallback({ destination, loadType });
-          }
-        } catch (error) {
-          transport = window.HB.transportFallback({ destination, loadType });
-        }
+      try {
+        transport = await resolveTransportFromInput(mapsInput, loadType);
+      } catch (error) {
+        setLocationMessage(error.message || 'No se pudo calcular la ubicación.', 'danger');
       }
 
       const totalCost = n('materialsCost') + n('staffCost') + n('rentalCost') + n('maintenanceCost') + n('extraCost') + Number(transport.suggestedCost || 0);
@@ -188,7 +227,7 @@
       const margin = window.HB.margin(totalCost, finalPrice, 0.5);
 
       document.getElementById('transportOut').textContent = window.HB.money(transport.suggestedCost);
-      document.getElementById('distanceOut').textContent = transport.roundTripKm ? `${transport.roundTripKm} km ida y vuelta aprox.` : 'Sin destino';
+      document.getElementById('distanceOut').textContent = transport.roundTripKm ? `${transport.roundTripKm} km ida y vuelta aprox.` : 'Sin distancia calculada';
       document.getElementById('costOut').textContent = window.HB.money(totalCost);
       document.getElementById('minimumOut').textContent = window.HB.money(minimumPrice);
       document.getElementById('marginOut').textContent = `${Math.round(margin.marginPercent * 100)}%`;
@@ -203,9 +242,10 @@
       document.getElementById('statusOut').className = `hb-alert ${status === 'rojo' ? 'danger' : status === 'amarillo' ? 'warn' : 'info'}`;
       document.getElementById('statusOut').innerHTML = `<span class="hb-status ${status}">${status}</span> ${statusText}`;
 
-      const clientName = document.getElementById('clientName').value || 'Hola';
+      const clientName = document.getElementById('clientName').value.trim();
+      const greeting = clientName ? `${clientName},` : 'Hola,';
       const eventType = document.getElementById('eventType').value;
-      lastMessage = `${clientName}, gracias por escribir a Hello Balloons. Para tu ${eventType}, la cotización sugerida es de ${window.HB.money(finalPrice)}. Incluye costos de materiales, personal y transporte estimado. Para reservar la fecha necesitamos confirmar horario, ubicación exacta y detalles de colores/temática.`;
+      lastMessage = `${greeting} gracias por escribir a Hello Balloons. Para tu ${eventType}, la cotización sugerida es de ${window.HB.money(finalPrice)}. Incluye materiales, personal y transporte estimado. Para reservar la fecha necesitamos confirmar horario, ubicación exacta, colores y temática.`;
       document.getElementById('messageOut').textContent = lastMessage;
     }
 
