@@ -265,7 +265,7 @@
     const current = window.location.pathname.split('/').pop() || 'dashboard.html';
     const internalPages = [
       'dashboard.html',
-      'admin.html',
+      'analytics.html',
       'admin-galeria.html',
       'inventario-app.html',
       'rutas.html',
@@ -280,7 +280,7 @@
 
     const items = [
       { href: 'dashboard.html', label: 'Inicio' },
-      { href: 'admin.html', label: 'Pedidos' },
+      { href: 'analytics.html', label: 'Analytics' },
       { href: 'admin-galeria.html', label: 'Galería' },
       { href: 'inventario-app.html', label: 'Inventario' },
       { href: 'rutas.html', label: 'Rutas' },
