@@ -116,7 +116,7 @@
             <a id="mapsSearchLink" class="hb-button secondary" target="_blank" rel="noopener" href="https://www.google.com/maps/search/salones+de+eventos+Santa+Cruz+de+la+Sierra">Buscar en Google Maps</a>
           </div>
           <div id="mapPicker"></div>
-          <p class="hb-muted" id="mapStatus">También puedes tocar el mapa para marcar un punto aproximado.</p>
+          <p class="hb-muted" id="mapStatus">También puedes tocar el mapa para marcar un punto aproximado. Si marcas el punto, enviaremos un link de Google Maps por WhatsApp.</p>
         </div>
       </div>
 
@@ -182,6 +182,15 @@
     function budgetLabel() { return state.budgetPrivate ? 'Prefiere no indicar' : (state.budgetAmount ? `Bs. ${state.budgetAmount}` : 'No indicado'); }
     function allColors() { return [...state.colors, ...state.otherColors.split(',').map(x => x.trim()).filter(Boolean)]; }
     function valueOrDash(value) { if (Array.isArray(value)) return value.length ? value.join(', ') : 'No indicado'; return value || 'No indicado'; }
+    function mapsLinkFromCoords(lat, lng) { return `https://www.google.com/maps?q=${lat},${lng}`; }
+    function formatLocationForMessage() {
+      const written = state.locationText.trim();
+      const pointLink = state.mapLat && state.mapLng ? mapsLinkFromCoords(state.mapLat, state.mapLng) : '';
+      if (written && pointLink) return `${written}\nPunto marcado: ${pointLink}`;
+      if (written) return written;
+      if (pointLink) return pointLink;
+      return 'No indicado';
+    }
 
     function initMap() {
       if (map || !window.L) return;
@@ -192,20 +201,21 @@
         state.mapLat = Number(e.latlng.lat.toFixed(6));
         state.mapLng = Number(e.latlng.lng.toFixed(6));
         if (marker) marker.setLatLng(e.latlng); else marker = L.marker(e.latlng).addTo(map);
-        document.getElementById('mapStatus').textContent = `Punto marcado: ${state.mapLat}, ${state.mapLng}`;
+        const link = mapsLinkFromCoords(state.mapLat, state.mapLng);
+        document.getElementById('mapStatus').innerHTML = `Punto marcado: <a class="hb-small-link" href="${link}" target="_blank" rel="noopener">abrir en Google Maps</a>`;
       });
       setTimeout(() => map.invalidateSize(), 200);
     }
 
     function renderSummary() {
       syncInputsToState();
-      const locationValue = state.locationText || (state.mapLat ? `${state.mapLat}, ${state.mapLng}` : 'No indicado');
+      const locationValue = formatLocationForMessage();
       const summary = [['Evento', state.eventType], ['Estilo', state.packageLevel], ['Colores', allColors()], ['Idea / temática', state.themeText], ['Fotos de referencia', state.referencePhotoCount ? `${state.referencePhotoCount} archivo(s)` : 'No indicado'], ['Fecha', state.eventDate], ['Hora', state.eventTime], ['Ubicación', locationValue], ['Presupuesto', budgetLabel()], ['Nombre', state.clientName], ['WhatsApp', state.clientPhone]];
       document.getElementById('summaryBox').innerHTML = summary.map(([label, value]) => `<div class="hb-summary-row"><span>${window.HB.escapeHtml(label)}</span><span>${window.HB.escapeHtml(valueOrDash(value))}</span></div>`).join('');
     }
 
     function buildWhatsAppText(orderNumber) {
-      const locationValue = state.locationText || (state.mapLat ? `${state.mapLat}, ${state.mapLng}` : 'No indicado');
+      const locationValue = formatLocationForMessage();
       return `Hola Jennifer, quiero cotizar con Hello Balloons.%0A%0AEvento: ${encodeURIComponent(state.eventType || 'No indicado')}%0AEstilo: ${encodeURIComponent(state.packageLevel || 'No indicado')}%0AColores: ${encodeURIComponent(allColors().join(', ') || 'No indicado')}%0AIdea: ${encodeURIComponent(state.themeText || 'No indicada')}%0AFecha: ${encodeURIComponent(state.eventDate || 'No indicada')}%0AHora: ${encodeURIComponent(state.eventTime || 'No indicada')}%0AUbicación: ${encodeURIComponent(locationValue)}%0APresupuesto: ${encodeURIComponent(budgetLabel())}%0ANombre: ${encodeURIComponent(state.clientName)}%0AWhatsApp: ${encodeURIComponent(state.clientPhone)}${orderNumber ? `%0ACódigo: ${encodeURIComponent(orderNumber)}` : ''}`;
     }
 
@@ -253,8 +263,8 @@
       const box = document.getElementById('submitMessage');
       const whatsappBox = document.getElementById('whatsappBox');
       const whatsappLink = document.getElementById('whatsappLink');
-      const locationValue = state.locationText || (state.mapLat ? `${state.mapLat}, ${state.mapLng}` : '');
-      const notes = [`Estilo: ${state.packageLevel || 'No indicado'}`, `Colores: ${allColors().join(', ') || 'No indicado'}`, `Idea: ${state.themeText || 'No indicada'}`, `Fotos de referencia: ${state.referencePhotoCount}`, `Ubicación: ${locationValue || 'No indicada'}`, `Presupuesto: ${budgetLabel()}`, state.mapLat ? `Punto marcado: ${state.mapLat}, ${state.mapLng}` : ''].filter(Boolean).join('\n');
+      const locationValue = formatLocationForMessage();
+      const notes = [`Estilo: ${state.packageLevel || 'No indicado'}`, `Colores: ${allColors().join(', ') || 'No indicado'}`, `Idea: ${state.themeText || 'No indicada'}`, `Fotos de referencia: ${state.referencePhotoCount}`, `Ubicación: ${locationValue}`, `Presupuesto: ${budgetLabel()}`].filter(Boolean).join('\n');
 
       if (!state.clientName || !state.clientPhone) { box.className = 'hb-alert warn'; box.textContent = 'Para enviar la solicitud necesitamos tu nombre y WhatsApp.'; box.style.display = 'block'; return; }
       whatsappLink.href = `https://wa.me/${JENNIFER_PHONE}?text=${buildWhatsAppText('')}`;
@@ -264,7 +274,7 @@
 
       try {
         const client = window.HB.client();
-        const orderPayload = { client_name: state.clientName, client_phone: state.clientPhone, event_date: state.eventDate || new Date().toISOString().slice(0, 10), event_type: state.eventType || 'Evento', event_address: locationValue || null, desired_budget: state.budgetPrivate || !state.budgetAmount ? null : Number(state.budgetAmount), notes, total_amount: 0, currency: 'BOB', status: 'new' };
+        const orderPayload = { client_name: state.clientName, client_phone: state.clientPhone, event_date: state.eventDate || new Date().toISOString().slice(0, 10), event_type: state.eventType || 'Evento', event_address: locationValue !== 'No indicado' ? locationValue : null, desired_budget: state.budgetPrivate || !state.budgetAmount ? null : Number(state.budgetAmount), notes, total_amount: 0, currency: 'BOB', status: 'new' };
         const { data, error } = await client.rpc('create_order_with_items', { order_payload: orderPayload, items_payload: [] }).single();
         if (error) throw error;
         const orderId = data.id;
