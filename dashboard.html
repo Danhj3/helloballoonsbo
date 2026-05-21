@@ -19,7 +19,6 @@
       <a class="hb-brand" href="dashboard.html"><img src="https://i.imgur.com/41t5f0K.png" alt="Hello Balloons" /><span>Dashboard</span></a>
       <div class="hb-nav-links">
         <a class="active" href="dashboard.html">Inicio</a>
-        <a href="admin.html">Pedidos</a>
         <a href="admin-galeria.html">Galería</a>
         <a href="inventario-app.html">Inventario</a>
         <a href="rutas.html">Rutas</a>
@@ -43,20 +42,20 @@
           <div>
             <div class="hb-eyebrow">Panel interno</div>
             <h2>Dashboard Hello Balloons</h2>
-            <p class="hb-muted">Gestiona pedidos, galería, inventario, rutas, cotizaciones y memoria desde un solo lugar.</p>
+            <p class="hb-muted">Gestiona solicitudes, galería, inventario, rutas, cotizaciones y memoria desde un solo lugar.</p>
           </div>
           <button id="logoutButton" class="hb-button secondary" type="button">Salir</button>
         </div>
 
         <div class="hb-grid-4" style="margin-bottom:24px">
-          <div class="hb-kpi"><span>Pedidos nuevos</span><strong id="newOrders">0</strong></div>
+          <div class="hb-kpi"><span>Solicitudes nuevas</span><strong id="newOrders">0</strong></div>
           <div class="hb-kpi"><span>Fotos públicas</span><strong id="publicPhotos">0</strong></div>
           <div class="hb-kpi"><span>Inventario</span><strong id="inventoryCount">0</strong></div>
           <div class="hb-kpi"><span>Cotizaciones</span><strong id="quotesCount">0</strong></div>
         </div>
 
         <div class="hb-admin-grid">
-          <a class="hb-card pad hb-admin-card" href="admin.html"><h3>Pedidos recibidos</h3><p class="hb-muted">Revisar solicitudes de clientes y datos de contacto.</p></a>
+          <a class="hb-card pad hb-admin-card" href="#solicitudes"><h3>Solicitudes recibidas</h3><p class="hb-muted">Revisar y borrar solicitudes de clientes desde este dashboard.</p></a>
           <a class="hb-card pad hb-admin-card" href="admin-galeria.html"><h3>Galería pública</h3><p class="hb-muted">Subir fotos aprobadas para mostrar en la landing.</p></a>
           <a class="hb-card pad hb-admin-card" href="inventario-app.html"><h3>Inventario</h3><p class="hb-muted">Actualizar muebles, colores, estado y ubicación.</p></a>
           <a class="hb-card pad hb-admin-card" href="rutas.html"><h3>Rutas del día</h3><p class="hb-muted">Planificar paradas y horarios de montaje.</p></a>
@@ -64,18 +63,18 @@
           <a class="hb-card pad hb-admin-card" href="memoria-eventos.html"><h3>Memoria de eventos</h3><p class="hb-muted">Registrar qué se llevó y aprendizajes de eventos.</p></a>
         </div>
 
-        <section class="hb-section">
+        <section id="solicitudes" class="hb-section">
           <div class="hb-section-header">
             <div>
-              <h2>Limpiar datos de prueba</h2>
-              <p class="hb-muted">Borra registros individuales que fueron cargados por error o para probar. No se borra todo en masa.</p>
+              <h2>Solicitudes y datos de prueba</h2>
+              <p class="hb-muted">Borra registros individuales cargados por error o para probar. No se borra todo en masa.</p>
             </div>
             <button id="refreshLists" class="hb-button secondary" type="button">Actualizar listas</button>
           </div>
           <div id="deleteMessage" class="hb-alert info" style="display:none;margin-bottom:18px"></div>
           <div class="hb-grid-2">
             <article class="hb-card pad">
-              <h3>Últimos pedidos</h3>
+              <h3>Últimas solicitudes</h3>
               <div id="ordersList" class="hb-record-list"><p class="hb-muted">Cargando...</p></div>
             </article>
             <article class="hb-card pad">
@@ -97,8 +96,8 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase-config.js"></script>
-  <script src="assets/js/hb-core.js"></script>
+  <script src="assets/js/supabase-config.js?v=no-admin"></script>
+  <script src="assets/js/hb-core.js?v=no-admin"></script>
   <script>
     async function countTable(table, queryFn) {
       const client = window.HB.client();
@@ -152,7 +151,7 @@
           client.from('quotes').select('id, quote_number, status, final_price, suggested_price, created_at').order('created_at', { ascending:false }).limit(8)
         ]);
 
-        document.getElementById('ordersList').innerHTML = (orders || []).length ? orders.map(o => recordHtml({ title: `${o.order_number || 'Pedido'} · ${o.client_name || 'Sin cliente'}`, subtitle: `${o.event_type || 'Evento'} · ${o.event_date || 'Sin fecha'} · ${o.status || ''}`, table:'orders', id:o.id, openHref:'admin.html' })).join('') : '<p class="hb-muted">No hay pedidos.</p>';
+        document.getElementById('ordersList').innerHTML = (orders || []).length ? orders.map(o => recordHtml({ title: `${o.order_number || 'Solicitud'} · ${o.client_name || 'Sin cliente'}`, subtitle: `${o.event_type || 'Evento'} · ${o.event_date || 'Sin fecha'} · ${o.status || ''}`, table:'orders', id:o.id })).join('') : '<p class="hb-muted">No hay solicitudes.</p>';
         document.getElementById('memoriesList').innerHTML = (memories || []).length ? memories.map(m => recordHtml({ title: m.public_title || m.title, subtitle: `${m.event_type || 'Evento'} · ${m.is_public ? 'Público' : 'Privado'}`, table:'event_memories', id:m.id, openHref:'admin-galeria.html' })).join('') : '<p class="hb-muted">No hay eventos guardados.</p>';
         document.getElementById('inventoryList').innerHTML = (inventory || []).length ? inventory.map(i => recordHtml({ title: `${i.code || ''} ${i.name || 'Ítem'}`, subtitle: `${i.current_status || ''} · ${i.current_color || 'Sin color'}`, table:'inventory_items', id:i.id, openHref:'inventario-app.html' })).join('') : '<p class="hb-muted">No hay inventario.</p>';
         document.getElementById('quotesList').innerHTML = (quotes || []).length ? quotes.map(q => recordHtml({ title: q.quote_number || 'Cotización', subtitle: `${q.status || ''} · ${q.final_price || q.suggested_price || 0} Bs.`, table:'quotes', id:q.id, openHref:'cotizador.html' })).join('') : '<p class="hb-muted">No hay cotizaciones.</p>';
@@ -162,8 +161,8 @@
     }
 
     async function deleteRecord(table, id) {
-      const labels = { orders:'pedido', event_memories:'evento de galería/memoria', inventory_items:'ítem de inventario', quotes:'cotización' };
-      const ok = confirm(`¿Borrar este ${labels[table] || 'registro'}? Esta acción no se puede deshacer.`);
+      const labels = { orders:'solicitud', event_memories:'evento de galería/memoria', inventory_items:'ítem de inventario', quotes:'cotización' };
+      const ok = confirm(`¿Borrar esta ${labels[table] || 'registro'}? Esta acción no se puede deshacer.`);
       if (!ok) return;
       const client = window.HB.client();
       const { error } = await client.from(table).delete().eq('id', id);
